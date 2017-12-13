@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
@@ -42,7 +43,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Infof("Running with config %+v", cfg)
+	log.WithField("config", cfg).Info("active config")
 
 	oauth2Cfg = &oauth2.Config{
 		ClientID:     cfg.ClientID,
@@ -68,7 +69,7 @@ func main() {
 	http.Handle("/commandline", loginRequiredHandlers.ThenFunc(commandlineHandler))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	err = http.ListenAndServe(bindAddr, nil)
+	err = http.ListenAndServe(bindAddr, context.ClearHandler(http.DefaultServeMux))
 	if err != nil {
 		log.Errorf("Service failed to start: %s", err)
 		os.Exit(1)

@@ -39,6 +39,7 @@ type userInfo struct {
 	IDToken      string
 	RefreshToken string
 	ClientID     string
+	ClientSecret string
 	IssuerURL    string
 }
 
@@ -208,6 +209,7 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		IDToken:      idToken,
 		RefreshToken: refreshToken,
 		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
 		IssuerURL:    issuerUrl,
 	}
 

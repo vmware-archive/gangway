@@ -45,6 +45,7 @@ $ kubectl config set-credentials {{ .Email }}  \
     --auth-provider=oidc  \
     --auth-provider-arg=idp-issuer-url={{ .IssuerURL }}  \
     --auth-provider-arg=client-id={{ .ClientID }}  \
+    --auth-provider-arg=client-secret={{ .ClientSecret }} \
     --auth-provider-arg=refresh-token={{ .RefreshToken }} \
     --auth-provider-arg=id-token={{ .IDToken }}
            </pre>

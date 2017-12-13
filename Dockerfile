@@ -7,3 +7,7 @@ RUN dep ensure -v -vendor-only
 
 COPY cmd cmd
 RUN CGO_ENABLED=0 GOOS=linux go install -ldflags="-w -s" -v github.com/heptio/gangway/...
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+COPY --from=0 /go/bin/gangway /bin/gangway
