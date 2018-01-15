@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap ## TODO convert this to secret
+metadata:
+  name: gangway
+data:
+  gangway.yaml: |
+    cluster_name: "YourCluster"
+    authorize_url: "https://example.auth0.com/authorize"  
+    token_url: "https://example.auth0.com/oauth/token" 
+    client_id: "<your client ID>"
+    client_secret: "<your client secret>"
+    audience: "https://example.auth0.com/userinfo"
+    redirect_url: "https://gangway.yourcluster.com/callback" 
+    scopes: ["openid", "profile", "email", "offline_access"] 
+    username_claim: "sub"
+    email_claim: "email"
+
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: gangway
+  labels:
+    app: gangway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gangway
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: gangway
+        version: "v1.0.0"
+    spec:
+      containers:
+        - name: gangway
+          image: <your container image> 
+          command: ["gangway", "-config", "./gangway/gangway.yaml"]
+          env:
+            - name: GANGWAY_PORT
+              value:  "8080"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: gangway
+              mountPath: /gangway/
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 60
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: gangway
+          configMap:
+            name: gangway
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gangway
+  # example annotations if using AWS ELB with an SSL CERT
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: <aws arn for a cert>
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true"
+  labels:
+    app: gangway
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: "http"
+  selector:
+    app: gangway
