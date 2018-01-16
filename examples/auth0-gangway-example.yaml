@@ -1,19 +1,10 @@
 apiVersion: v1
-kind: ConfigMap ## TODO convert this to secret
+kind: Secret
 metadata:
   name: gangway
 data:
-  gangway.yaml: |
-    cluster_name: "YourCluster"
-    authorize_url: "https://example.auth0.com/authorize"  
-    token_url: "https://example.auth0.com/oauth/token" 
-    client_id: "<your client ID>"
-    client_secret: "<your client secret>"
-    audience: "https://example.auth0.com/userinfo"
-    redirect_url: "https://gangway.yourcluster.com/callback" 
-    scopes: ["openid", "profile", "email", "offline_access"] 
-    username_claim: "sub"
-    email_claim: "email"
+  # The value of gangway.yaml is a base64 encoded version of a config file
+  gangway.yaml: ICAgIGNsdXN0ZXJfbmFtZTogIllvdXJDbHVzdGVyIgogICAgYXV0aG9yaXplX3VybDogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vYXV0aG9yaXplIiAgCiAgICB0b2tlbl91cmw6ICJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tL29hdXRoL3Rva2VuIiAKICAgIGNsaWVudF9pZDogIjx5b3VyIGNsaWVudCBJRD4iCiAgICBjbGllbnRfc2VjcmV0OiAiPHlvdXIgY2xpZW50IHNlY3JldD4iCiAgICBhdWRpZW5jZTogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vdXNlcmluZm8iCiAgICByZWRpcmVjdF91cmw6ICJodHRwczovL2dhbmd3YXkueW91cmNsdXN0ZXIuY29tL2NhbGxiYWNrIiAKICAgIHNjb3BlczogWyJvcGVuaWQiLCAicHJvZmlsZSIsICJlbWFpbCIsICJvZmZsaW5lX2FjY2VzcyJdIAogICAgdXNlcm5hbWVfY2xhaW06ICJzdWIiCiAgICBlbWFpbF9jbGFpbTogImVtYWlsIg==
 
 ---
 apiVersion: apps/v1beta1
