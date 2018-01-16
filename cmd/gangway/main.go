@@ -31,6 +31,14 @@ var cfg *Config
 var oauth2Cfg *oauth2.Config
 var sessionStore *sessions.CookieStore
 
+// wrapper function for http logging
+func httpLogger(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer log.Printf("%s %s %s", r.Method, r.URL, r.RemoteAddr)
+		fn(w, r)
+	}
+}
+
 func main() {
 
 	cfgFile := flag.String("config", "", "The config file to use.")
@@ -60,9 +68,9 @@ func main() {
 
 	loginRequiredHandlers := alice.New(loginRequired)
 
-	http.HandleFunc("/", homeHandler)
-	http.HandleFunc("/login", loginHandler)
-	http.HandleFunc("/callback", callbackHandler)
+	http.HandleFunc("/", httpLogger(homeHandler))
+	http.HandleFunc("/login", httpLogger(loginHandler))
+	http.HandleFunc("/callback", httpLogger(callbackHandler))
 
 	// middleware'd routes
 	http.Handle("/logout", loginRequiredHandlers.ThenFunc(logoutHandler))
