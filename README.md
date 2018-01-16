@@ -1,6 +1,6 @@
 [TOC]
 
-Gangway
+gangway
 =======
 
 _(noun): An opening in the bulwark of the ship to allow passengers to board or leave the ship._
@@ -9,9 +9,9 @@ a collection of utilities that can be used to enable authn/authz flows for a kub
 
 ## Deploy
 
-### Gangway manifest
+### gangway manifest
 
-Gangway is comprised of a deployment and a service. The service may be exposed in any form you prefer be it Loadbalancer directly to the service or an Ingress.
+gangway is comprised of a deployment and a service. The service may be exposed in any form you prefer be it Loadbalancer directly to the service or an Ingress.
 
 [auth0 example](examples/auth0-gangway-example.yaml)
 
@@ -19,7 +19,7 @@ Gangway is comprised of a deployment and a service. The service may be exposed i
 
 ### Creating Config Secret
 
-The [gangway config](#Gangway Config) should be stored as a secret in Kubernetes becaue it contains sensitive information. To do this the value of your config file must be base64 encoded. For example the command `base64 config.yaml`  will produce results similar to the following. 
+The [gangway config](#gangway Config) should be stored as a secret in Kubernetes becaue it contains sensitive information. To do this the value of your config file must be base64 encoded. For example the command `base64 config.yaml`  will produce results similar to the following. 
 
 ```
 ICAgIGNsdXN0ZXJfbmFtZTogIllvdXJDbHVzdGVyIgogICAgYXV0aG9yaXplX3VybDogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vYXV0aG9yaXplIiAgCiAgICB0b2tlbl91cmw6ICJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tL29hdXRoL3Rva2VuIiAKICAgIGNsaWVudF9pZDogIjx5b3VyIGNsaWVudCBJRD4iCiAgICBjbGllbnRfc2VjcmV0OiAiPHlvdXIgY2xpZW50IHNlY3JldD4iCiAgICBhdWRpZW5jZTogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vdXNlcmluZm8iCiAgICByZWRpcmVjdF91cmw6ICJodHRwczovL2dhbmd3YXkueW91cmNsdXN0ZXIuY29tL2NhbGxiYWNrIiAKICAgIHNjb3BlczogWyJvcGVuaWQiLCAicHJvZmlsZSIsICJlbWFpbCIsICJvZmZsaW5lX2FjY2VzcyJdIAogICAgdXNlcm5hbWVfY2xhaW06ICJzdWIiCiAgICBlbWFpbF9jbGFpbTogImVtYWlsIg==
@@ -41,7 +41,7 @@ data:
 
 
 
-## Gangway Config
+## gangway Config
 
 ```
 # Your Cluster Name
@@ -59,14 +59,14 @@ client_id: "<your client ID>"
 # API Client Secret
 client_secret: "<your client secret>"
 
-# ?
+# Endpoint that provides user profile information
 audience: "https://example.auth0.com/userinfo"
 
 # Where to redirect back to. This should be a URL
 # Where gangway is reachable
 redirect_url: "https://gangway.yourcluster.com/callback" 
 
-# ?
+# Used to specify the scope of the requested authorisation in OAuth. 
 scopes: ["openid", "profile", "email", "offline_access"] 
 
 # What field to look at in the token to pull the username from
