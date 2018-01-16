@@ -73,7 +73,7 @@ func main() {
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	// create http server with timeouts
-	s := &http.Server{
+	httpServer := &http.Server{
 		Addr:         bindAddr,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -83,7 +83,7 @@ func main() {
 	go func() {
 		// exit with FATAL logging why we could not start
 		// example: FATA[0000] listen tcp 0.0.0.0:8080: bind: address already in use
-		log.Fatal(s.ListenAndServe())
+		log.Fatal(httpServer.ListenAndServe())
 	}()
 
 	// create channel listening for signals so we can have graceful shutdowns
@@ -93,6 +93,6 @@ func main() {
 
 	log.Println("Shutdown signal received, exiting.")
 	// close the HTTP server
-	s.Shutdown(context.Background())
+	httpServer.Shutdown(context.Background())
 
 }
