@@ -15,12 +15,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
@@ -69,9 +72,27 @@ func main() {
 	http.Handle("/commandline", loginRequiredHandlers.ThenFunc(commandlineHandler))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	err = http.ListenAndServe(bindAddr, context.ClearHandler(http.DefaultServeMux))
-	if err != nil {
-		log.Errorf("Service failed to start: %s", err)
-		os.Exit(1)
+	// create http server with timeouts
+	s := &http.Server{
+		Addr:         bindAddr,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
+
+	// start up the http server
+	go func() {
+		// exit with FATAL logging why we could not start
+		// example: FATA[0000] listen tcp 0.0.0.0:8080: bind: address already in use
+		log.Fatal(s.ListenAndServe())
+	}()
+
+	// create channel listening for signals so we can have graceful shutdowns
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	<-signalChan
+
+	log.Println("Shutdown signal received, exiting.")
+	// close the HTTP server
+	s.Shutdown(context.Background())
+
 }
