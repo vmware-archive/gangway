@@ -1,14 +1,48 @@
-gangway
+[TOC]
+
+Gangway
 =======
+
 _(noun): An opening in the bulwark of the ship to allow passengers to board or leave the ship._
 
 a collection of utilities that can be used to enable authn/authz flows for a kubernetes cluster.
 
-
 ## Deploy
+
+### Gangway manifest
+
+Gangway is comprised of a deployment and a service. The service may be exposed in any form you prefer be it Loadbalancer directly to the service or an Ingress.
+
+[auth0 example](examples/auth0-gangway-example.yaml)
+
+
+
+### Creating Config Secret
+
+The [gangway config](#Gangway Config) should be stored as a secret in Kubernetes becaue it contains sensitive information. To do this the value of your config file must be base64 encoded. For example the command `base64 config.yaml`  will produce results similar to the following. 
+
+```
+ICAgIGNsdXN0ZXJfbmFtZTogIllvdXJDbHVzdGVyIgogICAgYXV0aG9yaXplX3VybDogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vYXV0aG9yaXplIiAgCiAgICB0b2tlbl91cmw6ICJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tL29hdXRoL3Rva2VuIiAKICAgIGNsaWVudF9pZDogIjx5b3VyIGNsaWVudCBJRD4iCiAgICBjbGllbnRfc2VjcmV0OiAiPHlvdXIgY2xpZW50IHNlY3JldD4iCiAgICBhdWRpZW5jZTogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vdXNlcmluZm8iCiAgICByZWRpcmVjdF91cmw6ICJodHRwczovL2dhbmd3YXkueW91cmNsdXN0ZXIuY29tL2NhbGxiYWNrIiAKICAgIHNjb3BlczogWyJvcGVuaWQiLCAicHJvZmlsZSIsICJlbWFpbCIsICJvZmZsaW5lX2FjY2VzcyJdIAogICAgdXNlcm5hbWVfY2xhaW06ICJzdWIiCiAgICBlbWFpbF9jbGFpbTogImVtYWlsIg==
+
+```
+
+This will need to then be placed in to your secret manifest like the following example
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gangway
+data:
+  # The value of gangway.yaml is a base64 encoded version of a config file
+  gangway.yaml: ICAgIGNsdXN0ZXJfbmFtZTogIllvdXJDbHVzdGVyIgogICAgYXV0aG9yaXplX3VybDogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vYXV0aG9yaXplIiAgCiAgICB0b2tlbl91cmw6ICJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tL29hdXRoL3Rva2VuIiAKICAgIGNsaWVudF9pZDogIjx5b3VyIGNsaWVudCBJRD4iCiAgICBjbGllbnRfc2VjcmV0OiAiPHlvdXIgY2xpZW50IHNlY3JldD4iCiAgICBhdWRpZW5jZTogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vdXNlcmluZm8iCiAgICByZWRpcmVjdF91cmw6ICJodHRwczovL2dhbmd3YXkueW91cmNsdXN0ZXIuY29tL2NhbGxiYWNrIiAKICAgIHNjb3BlczogWyJvcGVuaWQiLCAicHJvZmlsZSIsICJlbWFpbCIsICJvZmZsaW5lX2FjY2VzcyJdIAogICAgdXNlcm5hbWVfY2xhaW06ICJzdWIiCiAgICBlbWFpbF9jbGFpbTogImVtYWlsIg==
+
+```
+
 
 
 ## Gangway Config
+
 ```
 # Your Cluster Name
 cluster_name: "YourCluster"
@@ -42,7 +76,28 @@ username_claim: "sub"
 email_claim: "email"
 ```
 
+
+
+Example config file
+
+```
+---
+  cluster_name: "YourCluster"
+  authorize_url: "https://example.auth0.com/authorize"  
+  token_url: "https://example.auth0.com/oauth/token" 
+  client_id: "<your client ID>"
+  client_secret: "<your client secret>"
+  audience: "https://example.auth0.com/userinfo"
+  redirect_url: "https://gangway.yourcluster.com/callback" 
+  scopes: ["openid", "profile", "email", "offline_access"] 
+  username_claim: "sub"
+  email_claim: "email"
+```
+
+
+
 ## API-Server flags
+
 https://kubernetes.io/docs/admin/authentication/#configuring-the-api-server
 
 The needed Flags are as follows
@@ -69,4 +124,32 @@ function (user, context, callback) {
 }
 ```
 
+
+
+## Build
+
+Requirements for building
+
+- Go
+- [go-bindata](https://github.com/jteeuwen/go-bindata)
+- [dep](https://github.com/golang/dep)
+
+A Makefile is provided for building tasks. The options are as follows
+
+```
+all: deps bindata
+	go build ./...
+
+deps:
+	dep ensure -v
+
+bindata:
+	go-bindata -o cmd/gangway/bindata.go templates/
+
+test:
+	go test ./...
+
+image:
+	docker build .
+```
 
