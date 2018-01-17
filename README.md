@@ -16,29 +16,9 @@ gangway is comprised of a deployment and a service. The service may be exposed i
 [auth0 example](examples/auth0-gangway-example.yaml)
 
 
-
 ### Creating Config Secret
 
-The [gangway config](#gangway Config) should be stored as a secret in Kubernetes becaue it contains sensitive information. To do this the value of your config file must be base64 encoded. For example the command `base64 config.yaml`  will produce results similar to the following. 
-
-```
-ICAgIGNsdXN0ZXJfbmFtZTogIllvdXJDbHVzdGVyIgogICAgYXV0aG9yaXplX3VybDogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vYXV0aG9yaXplIiAgCiAgICB0b2tlbl91cmw6ICJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tL29hdXRoL3Rva2VuIiAKICAgIGNsaWVudF9pZDogIjx5b3VyIGNsaWVudCBJRD4iCiAgICBjbGllbnRfc2VjcmV0OiAiPHlvdXIgY2xpZW50IHNlY3JldD4iCiAgICBhdWRpZW5jZTogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vdXNlcmluZm8iCiAgICByZWRpcmVjdF91cmw6ICJodHRwczovL2dhbmd3YXkueW91cmNsdXN0ZXIuY29tL2NhbGxiYWNrIiAKICAgIHNjb3BlczogWyJvcGVuaWQiLCAicHJvZmlsZSIsICJlbWFpbCIsICJvZmZsaW5lX2FjY2VzcyJdIAogICAgdXNlcm5hbWVfY2xhaW06ICJzdWIiCiAgICBlbWFpbF9jbGFpbTogImVtYWlsIg==
-
-```
-
-This will need to then be placed in to your secret manifest like the following example
-
-```
-apiVersion: v1
-kind: Secret
-metadata:
-  name: gangway
-data:
-  # The value of gangway.yaml is a base64 encoded version of a config file
-  gangway.yaml: ICAgIGNsdXN0ZXJfbmFtZTogIllvdXJDbHVzdGVyIgogICAgYXV0aG9yaXplX3VybDogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vYXV0aG9yaXplIiAgCiAgICB0b2tlbl91cmw6ICJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tL29hdXRoL3Rva2VuIiAKICAgIGNsaWVudF9pZDogIjx5b3VyIGNsaWVudCBJRD4iCiAgICBjbGllbnRfc2VjcmV0OiAiPHlvdXIgY2xpZW50IHNlY3JldD4iCiAgICBhdWRpZW5jZTogImh0dHBzOi8vZXhhbXBsZS5hdXRoMC5jb20vdXNlcmluZm8iCiAgICByZWRpcmVjdF91cmw6ICJodHRwczovL2dhbmd3YXkueW91cmNsdXN0ZXIuY29tL2NhbGxiYWNrIiAKICAgIHNjb3BlczogWyJvcGVuaWQiLCAicHJvZmlsZSIsICJlbWFpbCIsICJvZmZsaW5lX2FjY2VzcyJdIAogICAgdXNlcm5hbWVfY2xhaW06ICJzdWIiCiAgICBlbWFpbF9jbGFpbTogImVtYWlsIg==
-
-```
-
+The [gangway config](#gangway Config) should be stored as a secret in Kubernetes becaue it contains sensitive information. Create a gangway config based on the example, assuming you named the file `gangway-config.yaml` run the following command: `kubectl create secret --from-file=gangway-config.yml`
 
 
 ## gangway Config
