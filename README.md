@@ -1,4 +1,3 @@
-[TOC]
 
 gangway
 =======
@@ -18,7 +17,7 @@ gangway is comprised of a deployment and a service. The service may be exposed i
 
 ### Creating Config Secret
 
-The [gangway config](#gangway Config) should be stored as a secret in Kubernetes becaue it contains sensitive information. Create a gangway config based on the example, assuming you named the file `gangway-config.yaml` run the following command: `kubectl create secret --from-file=gangway-config.yml`
+The [gangway config](#gangway Config) should be stored as a secret in Kubernetes becaue it contains sensitive information. Create a gangway config based on the example, assuming you named the file `gangway-config.yaml` run the following command: `kubectl create secret generic gangway --from-file=gangway.yaml=gangway-config.yaml`
 
 
 ## gangway Config
