@@ -1,45 +1,61 @@
-<html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            pre.bash {
-              background-color: black;
-              color: #49fb35;
-              font-size: small;
-              font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
-              overflow: auto;
-              word-wrap: normal;
-              white-space: pre;
-            }
-        </style>
-    </head>
-    <body>
-        <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse fixed-top">
-          <a class="navbar-brand" href="/">gangway</a>
-          <div class="collapse navbar-collapse pull-right" id="navbarSupportedContent">
-	    <ul class="nav navbar-nav mr-auto">
-              <li class="nav-item">
-                <a class="nav-link" href="/logout">Logout</a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-        <div class="container">
-           <h2>Welcome {{ .Username }}.</h2>
-	   <p class="lead">
-           In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authenication for your client.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>Gangway</title>
 
-	   The Kubernetes command-line utility, kubectl, may be installed like so:
-	   </p>
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <style>
+        pre.bash {
+            background-color: black;
+            color: #49fb35;
+            font-size: small;
+            font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+            overflow: auto;
+            word-wrap: normal;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+    <body>
+        <nav class="light-blue blue" role="navigation">
+            <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">gangway</a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+
+            <ul id="nav-mobile" class="side-nav">
+                <li><a href="#">Decode JWT</a></li>
+            </ul>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+            </div>
+        </nav>
+        
+        <div class="container">
+            <h4 class="header center darken-3">
+                Welcome {{ .Username }}.
+            </h4>
+            <h5>
+                In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authenication for your client.
+            </h5>                
+            <br>
+            <p>
+                The Kubernetes command-line utility, kubectl, may be installed like so:
+            </p>
+      
+
+	   
            <pre class="bash">
 $ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/$(uname | awk '{print tolower($0)}')/amd64/kubectl
 $ chmod +x ./kubectl
 $ sudo mv ./kubectl /usr/local/bin/kubectl
            </pre>
-           <p class="lead">
-	       Once kubectl is installed, you may execute the following:
-           </p>
+            </p>
+                Once kubectl is installed, you may execute the following:</b>
+            </p>
            <pre class="bash">
 $ kubectl config set-credentials {{ .Email }}  \
     --auth-provider=oidc  \
