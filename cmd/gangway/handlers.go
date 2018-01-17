@@ -125,7 +125,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// user the access code to retrieve a token
+	// use the access code to retrieve a token
 	code := r.URL.Query().Get("code")
 	token, err := oauth2Cfg.Exchange(context.TODO(), code)
 	if err != nil {
@@ -179,26 +179,27 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 
 	jwtToken, err := parseToken(idToken)
 	if err != nil {
-		http.Error(w, "Could not parse claims", http.StatusInternalServerError)
+		http.Error(w, "Could not parse JWT", http.StatusInternalServerError)
 		return
 	}
 
 	claims := jwtToken.Claims.(jwt.MapClaims)
 	username, ok := claims[cfg.UsernameClaim].(string)
 	if !ok {
-		http.Error(w, "Could not parse claims", http.StatusInternalServerError)
+		http.Error(w, "Could not parse Username claim", http.StatusInternalServerError)
 		return
 	}
 
 	email, ok := claims[cfg.EmailClaim].(string)
 	if !ok {
-		http.Error(w, "Could not parse claims", http.StatusInternalServerError)
+		http.Error(w, "Could not parse Email claim", http.StatusInternalServerError)
+		log.Println("email Handler")
 		return
 	}
 
-	issuerUrl, ok := claims["iss"].(string)
+	issuerURL, ok := claims["iss"].(string)
 	if !ok {
-		http.Error(w, "Could not parse claims", http.StatusInternalServerError)
+		http.Error(w, "Could not parse Issuer URL claim", http.StatusInternalServerError)
 		return
 	}
 
@@ -210,7 +211,7 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: refreshToken,
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
-		IssuerURL:    issuerUrl,
+		IssuerURL:    issuerURL,
 	}
 
 	serveTemplate("commandline.tmpl", info, w)
