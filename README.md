@@ -29,8 +29,8 @@ cluster_name: "YourCluster"
 # The URL to send authorize requests to
 authorize_url: "https://example.auth0.com/authorize"
 
-# URL to get a token from 
-token_url: "https://example.auth0.com/oauth/token" 
+# URL to get a token from
+token_url: "https://example.auth0.com/oauth/token"
 
 # API Client ID
 client_id: "<your client ID>"
@@ -43,10 +43,10 @@ audience: "https://example.auth0.com/userinfo"
 
 # Where to redirect back to. This should be a URL
 # Where gangway is reachable
-redirect_url: "https://gangway.yourcluster.com/callback" 
+redirect_url: "https://gangway.yourcluster.com/callback"
 
-# Used to specify the scope of the requested authorisation in OAuth. 
-scopes: ["openid", "profile", "email", "offline_access"] 
+# Used to specify the scope of the requested authorisation in OAuth.
+scopes: ["openid", "profile", "email", "offline_access"]
 
 # What field to look at in the token to pull the username from
 username_claim: "sub"
@@ -62,13 +62,13 @@ Example config file
 ```
 ---
   cluster_name: "YourCluster"
-  authorize_url: "https://example.auth0.com/authorize"  
-  token_url: "https://example.auth0.com/oauth/token" 
+  authorize_url: "https://example.auth0.com/authorize"
+  token_url: "https://example.auth0.com/oauth/token"
   client_id: "<your client ID>"
   client_secret: "<your client secret>"
   audience: "https://example.auth0.com/userinfo"
-  redirect_url: "https://gangway.yourcluster.com/callback" 
-  scopes: ["openid", "profile", "email", "offline_access"] 
+  redirect_url: "https://gangway.yourcluster.com/callback"
+  scopes: ["openid", "profile", "email", "offline_access"]
   username_claim: "sub"
   email_claim: "email"
 ```
@@ -109,26 +109,19 @@ function (user, context, callback) {
 
 Requirements for building
 
-- Go
+- Go - currently tested against 1.9
 - [go-bindata](https://github.com/jteeuwen/go-bindata)
 - [dep](https://github.com/golang/dep)
+- [docker](https://docker.com) >= 17.05 as we use multi-stage builds
 
-A Makefile is provided for building tasks. The options are as follows
-
+Building a local binary is as simple as:
 ```
-all: deps bindata
-	go build ./...
-
-deps:
-	dep ensure -v
-
-bindata:
-	go-bindata -o cmd/gangway/bindata.go templates/
-
-test:
-	go test ./...
-
-image:
-	docker build .
+$ go get -u github.com/golang/dep/cmd/dep
+$ go get -u github.com/jteeuwen/go-bindata/...
+$ make
 ```
 
+To generate a Docker container image, simply run:
+```
+$ make image
+```
