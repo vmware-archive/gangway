@@ -35,29 +35,19 @@
         </nav>
         
         <div class="container">
-            <h4 class="header center darken-3">
-                Welcome {{ .Username }}.
-            </h4>
-            <h5>
-                In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authenication for your client.
-            </h5>                
-            <br>
-            <p>
-                The Kubernetes command-line utility, kubectl, may be installed like so:
-            </p>
-      
-
-	   
+           <h2>Welcome {{ .Username }}.</h2>
+	   <p class="lead">
+           In order to get command-line access to the Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authenication for your client.
+       </p>
+	   <p>
+       Please follow <a href="https://code.uacf.io/projects/INFRA/repos/kubernetes/browse/docs/USER_README.md"> this </a> documentation for getting setup to connect to our Kubernetes clusters
+       
+       </p>
+           <p class="lead">
+	       Once kubectl is installed and setup, you may execute the following:
+           </p>
            <pre class="bash">
-$ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/$(uname | awk '{print tolower($0)}')/amd64/kubectl
-$ chmod +x ./kubectl
-$ sudo mv ./kubectl /usr/local/bin/kubectl
-           </pre>
-            </p>
-                Once kubectl is installed, you may execute the following:</b>
-            </p>
-           <pre class="bash">
-$ kubectl config set-credentials {{ .Email }}  \
+$ kubectl config set-credentials self  \
     --auth-provider=oidc  \
     --auth-provider-arg=idp-issuer-url={{ .IssuerURL }}  \
     --auth-provider-arg=client-id={{ .ClientID }}  \
@@ -65,6 +55,13 @@ $ kubectl config set-credentials {{ .Email }}  \
     --auth-provider-arg=refresh-token={{ .RefreshToken }} \
     --auth-provider-arg=id-token={{ .IDToken }}
            </pre>
+           <p>
+           If you are trying to login to the kubernetes-dashboard you just need the following token
+           </p>
+           <pre class="bash">
+{{ .IDToken }}
+           </pre>
+           </p>
         </div>
     </body>
 </html>
