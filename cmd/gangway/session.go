@@ -18,11 +18,15 @@ import (
 	"encoding/base64"
 	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/sessions"
 )
 
 func generateRandomString(length int) string {
+	// seed the random number generator
+	rand.Seed(time.Now().UnixNano())
+
 	b := make([]byte, length)
 	rand.Read(b)
 	randomStr := base64.StdEncoding.EncodeToString(b)
