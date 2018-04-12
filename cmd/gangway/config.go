@@ -22,22 +22,24 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Config the configuration field for gangway
 type Config struct {
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
 
-	ClusterName   string   `yaml:"cluster_name" envconfig:"cluster_name"`
-	AuthorizeURL  string   `yaml:"authorize_url" envconfig:"authorize_url"`
-	TokenURL      string   `yaml:"token_url" envconfig:"token_url"`
-	ClientID      string   `yaml:"client_id" envconfig:"client_id"`
-	ClientSecret  string   `yaml:"client_secret" envconfig:"client_secret"`
+	ClusterName   string   `yaml:"clusterName" envconfig:"cluster_name"`
+	AuthorizeURL  string   `yaml:"authorizeURL" envconfig:"authorize_url"`
+	TokenURL      string   `yaml:"tokenURL" envconfig:"token_url"`
+	ClientID      string   `yaml:"clientID" envconfig:"client_id"`
+	ClientSecret  string   `yaml:"clientSecret" envconfig:"client_secret"`
 	Audience      string   `yaml:"audience"`
-	RedirectURL   string   `yaml:"redirect_url" envconfig:"redirect_url"`
+	RedirectURL   string   `yaml:"redirectURL" envconfig:"redirect_url"`
 	Scopes        []string `yaml:"scopes"`
-	UsernameClaim string   `yaml:"username_claim" envconfig:"username_claim"`
-	EmailClaim    string   `yaml:"email_claim" envconfig:"email_claim"`
+	UsernameClaim string   `yaml:"usernameClaim" envconfig:"username_claim"`
+	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
 }
 
+// NewConfig returns a Config struct from serialized config file
 func NewConfig(configFile string) (*Config, error) {
 	cfg := &Config{
 		Host:          "0.0.0.0",
@@ -77,11 +79,11 @@ func validateConfig(cfg *Config) error {
 		bad    bool
 		errMsg string
 	}{
-		{cfg.AuthorizeURL == "", "no authorize_url specified"},
-		{cfg.TokenURL == "", "no token_url specified"},
-		{cfg.ClientID == "", "no client_id specified"},
-		{cfg.ClientSecret == "", "no client_secret specified"},
-		{cfg.RedirectURL == "", "no redirect_url specified"},
+		{cfg.AuthorizeURL == "", "no authorizeURL specified"},
+		{cfg.TokenURL == "", "no tokenURL specified"},
+		{cfg.ClientID == "", "no clientID specified"},
+		{cfg.ClientSecret == "", "no clientSecret specified"},
+		{cfg.RedirectURL == "", "no redirectURL specified"},
 	}
 
 	for _, check := range checks {

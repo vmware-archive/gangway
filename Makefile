@@ -15,6 +15,10 @@
 all: deps bindata
 	go build ./...
 
+setup:
+	go get -u github.com/golang/dep/cmd/dep
+	go get -u github.com/jteeuwen/go-bindata/...
+
 deps:
 	dep ensure -v
 
@@ -27,4 +31,4 @@ test:
 image:
 	docker build .
 
-.PHONY: all deps bindata test image
+.PHONY: all deps bindata test image setup

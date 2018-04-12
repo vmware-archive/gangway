@@ -1,5 +1,5 @@
 *.swp
 *.swo
 config.yml
-./gangway
+gangway
 vendor/
