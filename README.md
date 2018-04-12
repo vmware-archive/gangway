@@ -4,7 +4,7 @@ gangway
 
 _(noun): An opening in the bulwark of the ship to allow passengers to board or leave the ship._
 
-a collection of utilities that can be used to enable authn/authz flows for a kubernetes cluster.
+a collection of utilities that can be used to enable authn/authz flows via OIDC for a kubernetes cluster.
 
 ## Deploy
 
@@ -15,7 +15,9 @@ a collection of utilities that can be used to enable authn/authz flows for a kub
 
 gangway is comprised of a deployment and a service. The service may be exposed in any form you prefer be it Loadbalancer directly to the service or an Ingress.
 
-[auth0 example](examples/auth0-gangway-example.yaml)
+* [auth0 example](examples/auth0-gangway-example.yaml)
+
+* [Google OAuth example](#google-oauth-config)
 
 
 ### Creating Config Secret
@@ -133,10 +135,11 @@ kube-apiserver
 --oidc-username-claim sub
 --oidc-groups-claim "https://example.auth0.com/groups"
 ```
+
 ## Auth0 Config
 - RS256 signing
 
-**Rule for adding group metadata**
+** Rule for adding group metadata**
 ```
 function (user, context, callback) {
     if (user.app_metadata && 'groups' in user.app_metadata) {
@@ -148,6 +151,43 @@ function (user, context, callback) {
   callback(null, user, context);
 }
 ```
+
+## Google OAuth Config
+
+It is possible to use Google as an OAuth provider with gangway. To do so follow the instructions below:
+
+### Setting Up Google OAuth
+
+* Head to Credentials area of Google Cloud: `https://console.cloud.google.com/apis/credentials?project=<your-google-cloud-project-name>`.
+If previously you haven't created any credentials, you should see an empty list
+
+![google oauth empty list](images/goauth-empty.png)
+
+* In that page, click on "Create credentials". A menu will pop-over. From that menu click on "OAuth client ID".
+
+![google oauth menu](images/goauth-add-credentials-menu.png)
+
+* In the page you will land, choose "Web application" for the type, then give the oath client id a name and fill in the the callback url appropriately, then click "Create".
+
+![google oauth settings](images/goauth-client-settings.png)
+
+* If successful, you'll be prompted in the modal window if you want to copy the client id and secret. Click "OK" to close.
+
+* In the list, you should see the credentials we just created. To the right, there are 3 action icons. Click on the downward "download" arrow.
+
+### Back to Gangway
+
+Now that we have created thwe OAuth client credentials created and the file downloaded, we need a few more steps to get it running:
+
+* Open `examples/gangway-google-config.yaml` and modify fields as instructed.
+
+* Create a Kubernetes secret as descibed at the beginning of this file (replacing names, naturally)
+
+* After the secret has been created, run `kubectl apply -f examples/google-gangway-example.yaml`
+
+* After a few minutes, run `kubectl get deployments/gangway` and make note of the external IP address.
+
+* Once you have the external IP, paste it in a browser url bar. From here on, follow the instructions on screen.
 
 ## Build
 
