@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: gangway
-          image: <your container image> 
+          image: gcr.io/heptio-images/gangway:latest
           command: ["gangway", "-config", "./gangway/gangway.yaml"]
           env:
             - name: GANGWAY_PORT

@@ -9,7 +9,7 @@ a collection of utilities that can be used to enable authn/authz flows for a kub
 ## Deploy
 
 ### Docker image
-gcr.io/heptio-images/gangway:<tag>
+`gcr.io/heptio-images/gangway:<tag>`
 
 ### gangway manifest
 
