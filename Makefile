@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+PROJECT := gangway
+# Where to push the docker image.
+REGISTRY ?= gcr.io/heptio-images
+IMAGE := $(REGISTRY)/$(PROJECT)
+
+VERSION ?= master
+
 all: deps bindata
 	go build ./...
 
@@ -29,6 +36,9 @@ test:
 	go test ./...
 
 image:
-	docker build .
+	docker build . -t $(IMAGE):$(VERSION)
+
+push:
+	docker push $(IMAGE):$(VERSION)
 
 .PHONY: all deps bindata test image setup
