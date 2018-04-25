@@ -37,6 +37,7 @@ type Config struct {
 	Scopes        []string `yaml:"scopes"`
 	UsernameClaim string   `yaml:"usernameClaim" envconfig:"username_claim"`
 	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
+	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
 }
 
 // NewConfig returns a Config struct from serialized config file
