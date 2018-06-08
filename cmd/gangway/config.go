@@ -27,26 +27,32 @@ type Config struct {
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
 
-	ClusterName   string   `yaml:"clusterName" envconfig:"cluster_name"`
-	AuthorizeURL  string   `yaml:"authorizeURL" envconfig:"authorize_url"`
-	TokenURL      string   `yaml:"tokenURL" envconfig:"token_url"`
-	ClientID      string   `yaml:"clientID" envconfig:"client_id"`
-	ClientSecret  string   `yaml:"clientSecret" envconfig:"client_secret"`
-	Audience      string   `yaml:"audience"`
-	RedirectURL   string   `yaml:"redirectURL" envconfig:"redirect_url"`
-	Scopes        []string `yaml:"scopes"`
-	UsernameClaim string   `yaml:"usernameClaim" envconfig:"username_claim"`
-	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
+	ClusterName     string   `yaml:"clusterName" envconfig:"cluster_name"`
+	AuthorizeURL    string   `yaml:"authorizeURL" envconfig:"authorize_url"`
+	TokenURL        string   `yaml:"tokenURL" envconfig:"token_url"`
+	ClientID        string   `yaml:"clientID" envconfig:"client_id"`
+	ClientSecret    string   `yaml:"clientSecret" envconfig:"client_secret"`
+	Audience        string   `yaml:"audience"`
+	RedirectURL     string   `yaml:"redirectURL" envconfig:"redirect_url"`
+	Scopes          []string `yaml:"scopes"`
+	UsernameClaim   string   `yaml:"usernameClaim" envconfig:"username_claim"`
+	EmailClaim      string   `yaml:"emailClaim" envconfig:"email_claim"`
+	UseTLS          bool     `yaml:"useTLS" envconfig:"use_tls"`
+	TLSCertFilePath string   `yaml:"tlsCertFilePath" envconfig:"tls_cert_file_path"`
+	TLSKeyFilePath  string   `yaml:"tlsKeyFilePath" envconfig:"tls_key_file_path"`
 }
 
 // NewConfig returns a Config struct from serialized config file
 func NewConfig(configFile string) (*Config, error) {
 	cfg := &Config{
-		Host:          "0.0.0.0",
-		Port:          8080,
-		Scopes:        []string{"openid", "profile", "email", "offline_access"},
-		UsernameClaim: "nickname",
-		EmailClaim:    "email",
+		Host:            "0.0.0.0",
+		Port:            8080,
+		Scopes:          []string{"openid", "profile", "email", "offline_access"},
+		UsernameClaim:   "nickname",
+		EmailClaim:      "email",
+		UseTLS:          false,
+		TLSCertFilePath: "/etc/gangway/tls/tls.crt",
+		TLSKeyFilePath:  "/etc/gangway/tls/tls.key",
 	}
 
 	if configFile != "" {
