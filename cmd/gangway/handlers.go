@@ -163,7 +163,9 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 	// read in public ca.crt to output in commandline copy/paste commands
 	file, err := os.Open(clusterCAPath)
 	if err != nil {
-		log.Fatal(err)
+		// let us know that we couldn't open the file. This only cause missing output
+		// does not impact actual function of program
+		log.Errorf("Failed to open CA file. %s", err)
 	}
 	defer file.Close()
 	caBytes, err := ioutil.ReadAll(file)
