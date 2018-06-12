@@ -32,7 +32,6 @@ import (
 
 const (
 	templatesBase = "templates"
-	clusterCAPath = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 )
 
 type userInfo struct {
@@ -161,7 +160,7 @@ func parseToken(idToken string) (*jwt.Token, error) {
 func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 
 	// read in public ca.crt to output in commandline copy/paste commands
-	file, err := os.Open(clusterCAPath)
+	file, err := os.Open(cfg.ClusterCAPath)
 	if err != nil {
 		// let us know that we couldn't open the file. This only cause missing output
 		// does not impact actual function of program

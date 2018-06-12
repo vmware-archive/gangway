@@ -38,6 +38,7 @@ type Config struct {
 	UsernameClaim string   `yaml:"usernameClaim" envconfig:"username_claim"`
 	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
 	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
+	ClusterCAPath string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
 }
 
 // NewConfig returns a Config struct from serialized config file
@@ -48,6 +49,7 @@ func NewConfig(configFile string) (*Config, error) {
 		Scopes:        []string{"openid", "profile", "email", "offline_access"},
 		UsernameClaim: "nickname",
 		EmailClaim:    "email",
+		ClusterCAPath: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
 	}
 
 	if configFile != "" {
