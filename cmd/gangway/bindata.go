@@ -175,6 +175,7 @@ func FSMustByte(useLocal bool, name string) []byte {
 		panic(err)
 	}
 	return b
+
 }
 
 // FSString is the string version of FSByte.
@@ -192,8 +193,9 @@ var _escData = map[string]*_escFile{
 
 	"/templates/commandline.tmpl": {
 		local:   "templates/commandline.tmpl",
+
 		size:    4187,
-		modtime: 1536697541,
+		modtime: 1531428210,
 		compressed: `
 H4sIAAAAAAAC/7RY61fbuBL/zl8x6+052x6qKFBe7Y1zTxqgTQsNJaEUzn5YWZ7YIrJkJDkPevnf75ET
 8wiBcu92v8RoRjO/+c3Dkmn8tttt98+O9iB1mWyuNPwDJFNJGKAKvABZ3FwBaGToGKTO5QQvCzEKg7ZW
@@ -222,13 +224,16 @@ x2ylin42TGDRkfnELZtLQiyaEZrQ61pHnV65Ojk+mCk5GicGfuKQ+OnT5fn6v4EbjFH5DzJbBrCXMSG9
 d/izzAYpHZPc6JGI0YRaxPwRHWEmCUWcE2FtgYYURpZxd8rlPOgnTGcvCiLicBa+X3V2n2dkkRt0dwx7
 pcAbP25rcGDQpsTpIarS9ngm6XvB07YivmPW2a0slqbYfw1P3PL6zosfLlUWdq6pqrLovrD4hPuFdl4y
 d4uDd+dAbNDZFapBZ/9K+G8AAAD///UTb8hbEAAA
+
 `,
 	},
 
 	"/templates/home.tmpl": {
 		local:   "templates/home.tmpl",
 		size:    2088,
-		modtime: 1536697541,
+
+		modtime: 1531422938,
+
 		compressed: `
 H4sIAAAAAAAC/4xWUW/jNgx+76/g6V42LLKbuxXYcnaGrd2AYnfrgHYH7JGWGZutLPkkOW5u2H8fJMdJ
 mhuwBUgsUhT5kR9ppXh1c3f98OfvP0MbOr2+KOIDNJqmFGREVBDW6wuAoqOA0IbQS/o08LYU19YEMkE+
@@ -249,6 +254,7 @@ EIy4JS9ps4kQJyHVYpq7dcJ5a05H4QWsmdDzLkqLqD3cQnCvHPfB7y8inyTwTp3cD7am7PHTQG6XroZp
 Kd9ky2yZ3vyPXqyLfDr6hZfHlzfFf9nGy/XMKCGfXkdFPv0tuPgnAAD//yEDNLMoCAAA
 `,
 	},
+
 
 	"/": {
 		isDir: true,
