@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -31,7 +32,8 @@ import (
 )
 
 const (
-	templatesBase = "templates"
+	templatesBase  = "templates"
+	kubeConfigFile = "gangway.kubeconfig"
 )
 
 type userInfo struct {
@@ -60,6 +62,32 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 	tmpl := template.New(tmplFile)
 	tmpl, _ = tmpl.Parse(string(templateData))
 	tmpl.ExecuteTemplate(w, tmplFile, data)
+}
+
+func generateKubeConfig(tmplFile string, data interface{}) {
+	templatePath := filepath.Join(templatesBase, tmplFile)
+	templateData, err := Asset(templatePath)
+	if err != nil {
+		log.Errorf("Failed to find template asset: %s", tmplFile)
+		return
+	}
+
+	// open file for writing
+	f, err := os.Create(kubeConfigFile)
+	// create buffered io writer
+	w := bufio.NewWriter(f)
+
+	tmpl := template.New(tmplFile)
+	tmpl, err = tmpl.Parse(string(templateData))
+	if err != nil {
+		log.Errorf("Error parsing kubeconfig template: %s", err)
+	}
+	err = tmpl.ExecuteTemplate(w, tmplFile, data)
+	if err != nil {
+		log.Errorf("Error executing kubeconf template: %s", err)
+	}
+	// flush file data to disk
+	w.Flush()
 }
 
 func loginRequired(next http.Handler) http.Handler {
@@ -230,5 +258,12 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		ClusterCA:    string(caBytes),
 	}
 
+	generateKubeConfig("kubeconfig.tmpl", info)
 	serveTemplate("commandline.tmpl", info, w)
+}
+
+func kubeConfigHandler(w http.ResponseWriter, r *http.Request) {
+	// tell the browser the returned content should be downloaded
+	w.Header().Add("Content-Disposition", "Attachment")
+	http.ServeFile(w, r, kubeConfigFile)
 }
