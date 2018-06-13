@@ -105,6 +105,7 @@ func main() {
 	// middleware'd routes
 	http.Handle("/logout", loginRequiredHandlers.ThenFunc(logoutHandler))
 	http.Handle("/commandline", loginRequiredHandlers.ThenFunc(commandlineHandler))
+	http.Handle("/kubeconf", loginRequiredHandlers.ThenFunc(kubeConfigHandler))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	// create http server with timeouts
