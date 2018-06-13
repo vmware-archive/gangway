@@ -78,9 +78,9 @@ apiServerURL: "https://kube-apiserver.yourcluster.com"
 ```
 
 ## Connecting Gangway to Dex
-  		  
+
 [Dex](https://github.com/coreos/dex) is a handy tool created by CoreOS that provides a common OIDC endpoint for multiple identity providers. To configure Gangway to communicate with Dex some information will need to be collected from Dex. Following OIDC standard, Dex provides a URL where its OIDC configuration can be gathered. This URL is located at `.well-known/openid-configuration`.If Dex is configured with an Issuer URL of `http://app.example.com` its OpenID config can be found at `http://app.example.com/.well-known/openid-configuration`. An example of the OpenID Configuration provided by Dex:
- 
+
  ```
  {
    "issuer": "http://app.example.com",
@@ -119,8 +119,8 @@ apiServerURL: "https://kube-apiserver.yourcluster.com"
    ]
  }
  ```
- 
- Using the Gangway example Dex's `autorization_endpoint` can be used for `authorize_url` and `token_endpoint` can be used for `token_url`. The Dex configuration provides a list named `claims_supported` which can be chosen from when defining both `username_claim` and `email_claim`. `client_id` and `client_secret` are strings that can be any value, but they must match the Client ID and Secret in your Dex configuration. 
+
+ Using the Gangway example Dex's `autorization_endpoint` can be used for `authorize_url` and `token_endpoint` can be used for `token_url`. The Dex configuration provides a list named `claims_supported` which can be chosen from when defining both `username_claim` and `email_claim`. `client_id` and `client_secret` are strings that can be any value, but they must match the Client ID and Secret in your Dex configuration.
 
 ## API-Server flags
 
@@ -202,6 +202,8 @@ A Makefile is provided for building tasks. The options are as follows
 
 Getting started is as simple as:
 ```
+$ go get github.com/heptiolabs/gangway
+$ cd $GOPATH/src/github.com/heptiolabs/gangway
 $ make setup
 $ make
 ```
