@@ -74,6 +74,7 @@ redirectURL: "https://gangway.example.com/callback"
 scopes: ["openid", "profile", "email", "offline_access"]
 usernameClaim: "sub"
 emailClaim: "email"
+apiServerURL: "https://kube-apiserver.yourcluster.com"
 ```
 
 ## Connecting Gangway to Dex

@@ -8,3 +8,4 @@
     scopes: ["openid", "profile", "email", "offline_access"] 
     usernameClaim: "sub"
     emailClaim: "email"
+    apiServerURL: "https://kube-apiserver.yourcluster.com"

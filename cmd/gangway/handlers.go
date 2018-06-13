@@ -18,8 +18,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"path/filepath"
 	"text/template"
 
@@ -41,6 +43,8 @@ type userInfo struct {
 	ClientID     string
 	ClientSecret string
 	IssuerURL    string
+	APIServerURL string
+	ClusterCA    string
 }
 
 func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
@@ -155,6 +159,16 @@ func parseToken(idToken string) (*jwt.Token, error) {
 
 func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 
+	// read in public ca.crt to output in commandline copy/paste commands
+	file, err := os.Open(cfg.ClusterCAPath)
+	if err != nil {
+		// let us know that we couldn't open the file. This only cause missing output
+		// does not impact actual function of program
+		log.Errorf("Failed to open CA file. %s", err)
+	}
+	defer file.Close()
+	caBytes, err := ioutil.ReadAll(file)
+
 	session, err := sessionStore.Get(r, "gangway")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -212,6 +226,8 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		IssuerURL:    issuerURL,
+		APIServerURL: cfg.APIServerURL,
+		ClusterCA:    string(caBytes),
 	}
 
 	serveTemplate("commandline.tmpl", info, w)
