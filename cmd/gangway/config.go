@@ -39,6 +39,8 @@ type Config struct {
 	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
 	CertFile      string   `yaml:"certFile" envconfig:"cert_file"`
 	KeyFile       string   `yaml:"keyFile" envconfig:"key_file"`
+	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
+	ClusterCAPath string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
 }
 
 // NewConfig returns a Config struct from serialized config file
@@ -51,6 +53,7 @@ func NewConfig(configFile string) (*Config, error) {
 		EmailClaim:    "email",
 		CertFile:      "/etc/gangway/tls/tls.crt",
 		KeyFile:       "/etc/gangway/tls/tls.key",
+		ClusterCAPath: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
 	}
 
 	if configFile != "" {

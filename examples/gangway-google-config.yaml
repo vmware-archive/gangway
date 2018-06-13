@@ -1,0 +1,34 @@
+# Your Cluster Name. There's no strict mapping, so it can be anything 
+clusterName: "your_cluster_name"
+
+# The URL to send authorize requests to
+# leave as is unless Google instructs you otherwise
+authorizeUrl: "https://accounts.google.com/o/oauth2/auth"
+
+# URL to get a token from
+# leave as is unless Google instructs you otherwise
+tokenUrl: "https://accounts.google.com/o/oauth2/token" 
+
+# API Client ID. Get from Google credentials "client_id" field
+clientId: "12345678901234567890.apps.googleusercontent.com"
+
+# API Client Secret. Get from Google credentials "client_secret" field
+clientSecret: "FRGegerwgfsFE_fefdsf"
+
+# Endpoint that provides user profile information. 
+# For Google's purpose is the same as your client_id
+audience: "923798723208-9pq62pkrnbhumipnqs4v0a1iu7ij01fo.apps.googleusercontent.com"
+
+# Where to redirect back to. This should be a URL
+# Where gangway is reachable. Cannot be a raw IP address. Must be a valid TLD.
+redirectUrl: "https://url.kuberneters.cluster.com/callback" 
+
+# Used to specify the scope of the requested authorisation in OAuth.
+# Unlike with Auth0, we do not need "offline" 
+scopes: ["openid", "profile", "email"] 
+
+# What field to look at in the token to pull the username from, leave as is
+usernameClaim: "sub"
+
+# What field to look at in the token to pull the email from, leave as is
+emailClaim: "email"
