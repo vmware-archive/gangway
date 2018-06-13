@@ -91,7 +91,7 @@ func main() {
 	go func() {
 		// exit with FATAL logging why we could not start
 		// example: FATA[0000] listen tcp 0.0.0.0:8080: bind: address already in use
-		if shouldServeTLS(cfg) == true {
+		if cfg.ServeTLS == true {
 			log.Fatal(httpServer.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile))
 		} else {
 			log.Fatal(httpServer.ListenAndServe())

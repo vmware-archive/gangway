@@ -37,6 +37,7 @@ type Config struct {
 	Scopes        []string `yaml:"scopes"`
 	UsernameClaim string   `yaml:"usernameClaim" envconfig:"username_claim"`
 	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
+	ServeTLS      bool     `yaml:"serveTLS" envconfig:"serve_tls"`
 	CertFile      string   `yaml:"certFile" envconfig:"cert_file"`
 	KeyFile       string   `yaml:"keyFile" envconfig:"key_file"`
 	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
@@ -51,6 +52,7 @@ func NewConfig(configFile string) (*Config, error) {
 		Scopes:        []string{"openid", "profile", "email", "offline_access"},
 		UsernameClaim: "nickname",
 		EmailClaim:    "email",
+		ServeTLS:      false,
 		CertFile:      "/etc/gangway/tls/tls.crt",
 		KeyFile:       "/etc/gangway/tls/tls.key",
 		ClusterCAPath: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
