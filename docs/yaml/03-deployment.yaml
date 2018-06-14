@@ -1,9 +1,8 @@
-
----
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: gangway
+  namespace: gangway
   labels:
     app: gangway
 spec:
@@ -12,24 +11,17 @@ spec:
     matchLabels:
       app: gangway
   strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
   template:
     metadata:
       labels:
         app: gangway
-        version: "v1.0.0"
+        revision: "1"
     spec:
       containers:
         - name: gangway
           image: gcr.io/heptio-images/gangway:latest
-          command: ["gangway", "-config", "./gangway/gangway.yaml"]
-          env:
-            - name: GANGWAY_PORT
-              value:  "8080"
           imagePullPolicy: Always
+          command: ["gangway", "-config", "/gangway/gangway.yaml"]
           ports:
             - name: http
               containerPort: 8080
@@ -63,24 +55,3 @@ spec:
         - name: gangway
           configMap:
             name: gangway
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: gangway
-  # example annotations if using AWS ELB with an SSL CERT
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: <aws arn for a cert>
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-    service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true"
-  labels:
-    app: gangway
-spec:
-  type: LoadBalancer
-  ports:
-    - protocol: TCP
-      port: 443
-      targetPort: "http"
-  selector:
-    app: gangway
