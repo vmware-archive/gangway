@@ -42,6 +42,8 @@ type Config struct {
 	KeyFile       string   `yaml:"keyFile" envconfig:"key_file"`
 	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
 	ClusterCAPath string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
+
+	SessionSecurityKey string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
 }
 
 // NewConfig returns a Config struct from serialized config file
@@ -93,6 +95,7 @@ func validateConfig(cfg *Config) error {
 		{cfg.ClientID == "", "no clientID specified"},
 		{cfg.ClientSecret == "", "no clientSecret specified"},
 		{cfg.RedirectURL == "", "no redirectURL specified"},
+		{cfg.SessionSecurityKey == "", "no SessionSecurityKey specified"},
 	}
 
 	for _, check := range checks {
