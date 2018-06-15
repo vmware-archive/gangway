@@ -20,6 +20,13 @@ import (
 	"testing"
 )
 
+func testInit() {
+	cfg = &Config{
+		SessionSecurityKey: "test",
+	}
+	initSessionStore()
+}
+
 func TestHomeHandler(t *testing.T) {
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -37,12 +44,12 @@ func TestHomeHandler(t *testing.T) {
 }
 
 func TestCallbackHandler(t *testing.T) {
+	testInit()
+
 	req, err := http.NewRequest("GET", "/callback", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	initSessionStore()
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(callbackHandler)
@@ -55,6 +62,8 @@ func TestCallbackHandler(t *testing.T) {
 }
 
 func TestUnauthedCommandlineHandlerRedirect(t *testing.T) {
+	testInit()
+
 	req, err := http.NewRequest("GET", "/commandline", nil)
 	if err != nil {
 		t.Fatal(err)

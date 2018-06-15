@@ -18,14 +18,13 @@ import (
 	"crypto/sha256"
 	"net/http"
 
-	"golang.org/x/crypto/pbkdf2"
-
 	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 const salt = "MkmfuPNHnZBBivy0L0aW"
 
-func initSessionStore() {
+func generateSessionKeys() ([]byte, []byte) {
 	// Take the configured security key and generate 96 bytes of data. This is
 	// used as the signing and encryption keys for the cookie store.  For details
 	// on the PBKDF2 function: https://en.wikipedia.org/wiki/PBKDF2
@@ -34,7 +33,12 @@ func initSessionStore() {
 		[]byte(salt),
 		4096, 96, sha256.New)
 
-	sessionStore = sessions.NewCookieStore(b[0:64], b[64:96])
+	return b[0:64], b[64:96]
+}
+
+func initSessionStore() {
+
+	sessionStore = sessions.NewCookieStore(generateSessionKeys())
 }
 
 func cleanupSession(w http.ResponseWriter, r *http.Request) {

@@ -24,16 +24,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func TestGenerateRandomString(t *testing.T) {
-	rs := generateRandomString(48)
-	rs2 := generateRandomString(48)
+func TestGenerateSessionKeys(t *testing.T) {
+	cfg.SessionSecurityKey = "testing"
 
-	if rs == "" {
-		t.Errorf("Received an empty string")
-		return
-	}
-	if rs == rs2 {
-		t.Errorf("Generated the same string two times in a row. String is not random.")
+	b1, b2 := generateSessionKeys()
+
+	if len(b1) != 64 || len(b2) != 32 {
+		t.Errorf("Wrong byte length's returned")
 		return
 	}
 }
