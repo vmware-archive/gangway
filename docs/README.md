@@ -16,6 +16,14 @@ While this is called a secret, based on the way that OAuth2 works with command l
 This will be divulged to any client that is configured through gangway.
 As such, it is probably acceptable to keep that secret in the config file and not worry about managing it as a true secret.
 
+We also have a secret string that is used to as a way to encrypt the cookies that are returned to the users.
+If using the example YAML, create a secret to hold this value with the following command line:
+
+```
+kubectl -n gangway create secret generic gangway-key \
+  --from-literal=sesssionkey=$(openssl rand -base64 32)
+```
+
 ## Docker image
 
 A recent release of Gangway is available at
@@ -101,6 +109,13 @@ apiServerURL: "mycluster.example.com"
 # a Kubernetes cluster and doesn't need to be set.
 # Env var: GANGWAY_CLUSTER_CA_PATH
 # cluster_ca_path: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+# This is a string that you must set to a random value. This is used to derive
+# encryption keys for writing cookies to clients.  While you can specify this
+# as a config file, it is probably better to create a secret and inject it
+# with an environment variable.
+# Env var: GANGWAY_SESSION_SECURITY_KEY
+sessionSecurityKey: "<random string>"
 ```
 
 A starting point for this config embedded in a configmap is at [yaml/02-config.yaml].
