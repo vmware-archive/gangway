@@ -33,6 +33,7 @@ func TestEnvionmentOverrides(t *testing.T) {
 	os.Setenv("GANGWAY_CLIENT_ID", "foo")
 	os.Setenv("GANGWAY_CLIENT_SECRET", "bar")
 	os.Setenv("GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
+	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
 	cfg, err := NewConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)
