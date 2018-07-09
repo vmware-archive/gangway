@@ -96,6 +96,7 @@ func validateConfig(cfg *Config) error {
 		{cfg.ClientSecret == "", "no clientSecret specified"},
 		{cfg.RedirectURL == "", "no redirectURL specified"},
 		{cfg.SessionSecurityKey == "", "no SessionSecurityKey specified"},
+		{cfg.APIServerURL == "", "no apiServerURL specified"},
 	}
 
 	for _, check := range checks {
