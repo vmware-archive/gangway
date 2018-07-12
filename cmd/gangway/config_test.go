@@ -27,13 +27,15 @@ func TestConfigNotFound(t *testing.T) {
 }
 
 func TestEnvionmentOverrides(t *testing.T) {
-	os.Setenv("GANGWAY_PORT", "1234")
 	os.Setenv("GANGWAY_AUTHORIZE_URL", "https://foo.bar/authorize")
-	os.Setenv("GANGWAY_TOKEN_URL", "https://foo.bar/token")
+	os.Setenv("GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
 	os.Setenv("GANGWAY_CLIENT_ID", "foo")
 	os.Setenv("GANGWAY_CLIENT_SECRET", "bar")
+	os.Setenv("GANGWAY_PORT", "1234")
 	os.Setenv("GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
+	os.Setenv("GANGWAY_CLUSTER_CA_PATH", "/etc/ssl/certs/ca-certificates.crt")
 	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
+	os.Setenv("GANGWAY_TOKEN_URL", "https://foo.bar/token")
 	cfg, err := NewConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)

@@ -24,16 +24,16 @@ all: deps bindata
 
 setup:
 	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/jteeuwen/go-bindata/...
+	go get -u github.com/mjibson/esc/...
 
 deps:
 	dep ensure -v
 
 bindata:
-	go-bindata -o cmd/gangway/bindata.go templates/
+	esc -o cmd/gangway/bindata.go templates/
 
 test:
-	go test ./...
+	go test -v ./...
 
 image:
 	docker build . -t $(IMAGE):$(VERSION)
