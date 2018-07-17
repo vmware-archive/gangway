@@ -30,8 +30,8 @@ kube-apiserver
 Requirements for building
 
 - Go (built with 1.10)
-- [go-bindata](https://github.com/jteeuwen/go-bindata)
-- [dep](https://github.com/golang/dep)
+- [esc](https://github.com/mjibson/esc) for static resources.
+- [dep](https://github.com/golang/dep) for dependency management.
 
 A Makefile is provided for building tasks. The options are as follows
 
