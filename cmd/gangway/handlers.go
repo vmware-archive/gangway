@@ -32,8 +32,9 @@ import (
 )
 
 const (
-	templatesBase  = "/templates"
-	kubeConfigFile = "gangway.kubeconfig"
+
+	templatesBase = "/templates"
+
 )
 
 type userInfo struct {
