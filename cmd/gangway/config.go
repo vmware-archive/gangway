@@ -37,8 +37,13 @@ type Config struct {
 	Scopes        []string `yaml:"scopes"`
 	UsernameClaim string   `yaml:"usernameClaim" envconfig:"username_claim"`
 	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
+	ServeTLS      bool     `yaml:"serveTLS" envconfig:"serve_tls"`
+	CertFile      string   `yaml:"certFile" envconfig:"cert_file"`
+	KeyFile       string   `yaml:"keyFile" envconfig:"key_file"`
 	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
 	ClusterCAPath string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
+
+	SessionSecurityKey string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
 }
 
 // NewConfig returns a Config struct from serialized config file
@@ -49,6 +54,9 @@ func NewConfig(configFile string) (*Config, error) {
 		Scopes:        []string{"openid", "profile", "email", "offline_access"},
 		UsernameClaim: "nickname",
 		EmailClaim:    "email",
+		ServeTLS:      false,
+		CertFile:      "/etc/gangway/tls/tls.crt",
+		KeyFile:       "/etc/gangway/tls/tls.key",
 		ClusterCAPath: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
 	}
 
@@ -87,6 +95,8 @@ func validateConfig(cfg *Config) error {
 		{cfg.ClientID == "", "no clientID specified"},
 		{cfg.ClientSecret == "", "no clientSecret specified"},
 		{cfg.RedirectURL == "", "no redirectURL specified"},
+		{cfg.SessionSecurityKey == "", "no SessionSecurityKey specified"},
+		{cfg.APIServerURL == "", "no apiServerURL specified"},
 	}
 
 	for _, check := range checks {

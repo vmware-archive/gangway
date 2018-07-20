@@ -15,27 +15,30 @@
 package main
 
 import (
-	"encoding/base64"
-	"math/rand"
+	"crypto/sha256"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/pbkdf2"
 )
 
-func generateRandomString(length int) string {
-	// seed the random number generator
-	rand.Seed(time.Now().UnixNano())
+const salt = "MkmfuPNHnZBBivy0L0aW"
 
-	b := make([]byte, length)
-	rand.Read(b)
-	randomStr := base64.StdEncoding.EncodeToString(b)
-	return randomStr
+func generateSessionKeys() ([]byte, []byte) {
+	// Take the configured security key and generate 96 bytes of data. This is
+	// used as the signing and encryption keys for the cookie store.  For details
+	// on the PBKDF2 function: https://en.wikipedia.org/wiki/PBKDF2
+	b := pbkdf2.Key(
+		[]byte(cfg.SessionSecurityKey),
+		[]byte(salt),
+		4096, 96, sha256.New)
+
+	return b[0:64], b[64:96]
 }
 
 func initSessionStore() {
-	secret := generateRandomString(48)
-	sessionStore = sessions.NewCookieStore([]byte(secret))
+
+	sessionStore = sessions.NewCookieStore(generateSessionKeys())
 }
 
 func cleanupSession(w http.ResponseWriter, r *http.Request) {
