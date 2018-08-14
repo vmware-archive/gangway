@@ -60,14 +60,14 @@ $ sudo mv ./kubectl /usr/local/bin/kubectl
                <code class="language-bash">
 echo "{{ .ClusterCA }}" \ > ca-{{ .ClusterName }}.pem
 kubectl config set-cluster {{ .ClusterName }} --server={{ .APIServerURL }} --certificate-authority=ca-{{ .ClusterName }}.pem
-kubectl config set-credentials {{ .Email }}  \
+kubectl config set-credentials {{ .Username }}@{{ .ClusterName }}  \
     --auth-provider=oidc  \
     --auth-provider-arg=idp-issuer-url={{ .IssuerURL }}  \
     --auth-provider-arg=client-id={{ .ClientID }}  \
     --auth-provider-arg=client-secret={{ .ClientSecret }} \
     --auth-provider-arg=refresh-token={{ .RefreshToken }} \
     --auth-provider-arg=id-token={{ .IDToken }}
-kubectl config set-context {{ .ClusterName }} --cluster={{ .ClusterName }} --user={{ .Email }}
+kubectl config set-context {{ .ClusterName }} --cluster={{ .ClusterName }} --user={{ .Username }}@{{ .ClusterName }}
 kubectl config use-context {{ .ClusterName }}
               </code>
             </pre>
