@@ -54,8 +54,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.WithField("config", cfg).Info("active config")
-
 	oauth2Cfg = &oauth2.Config{
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
