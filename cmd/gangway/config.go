@@ -42,6 +42,7 @@ type Config struct {
 	KeyFile       string   `yaml:"keyFile" envconfig:"key_file"`
 	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
 	ClusterCAPath string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
+	TrustedCAPath string   `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
 
 	SessionSecurityKey string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
 }
