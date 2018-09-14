@@ -1,5 +1,6 @@
 
 gangway
+[![Build Status](https://travis-ci.org/heptiolabs/gangway.svg?branch=master)](https://travis-ci.org/heptiolabs/gangway)
 =======
 
 _(noun): An opening in the bulwark of the ship to allow passengers to board or leave the ship._

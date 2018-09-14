@@ -62,8 +62,8 @@ func main() {
 		RedirectURL:  cfg.RedirectURL,
 		Scopes:       cfg.Scopes,
 		Endpoint: oauth2.Endpoint{
-			cfg.AuthorizeURL,
-			cfg.TokenURL,
+			AuthURL:  cfg.AuthorizeURL,
+			TokenURL: cfg.TokenURL,
 		},
 	}
 
