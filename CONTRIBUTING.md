@@ -2,7 +2,7 @@
 
 All authors to the project retain copyright to their work. However, to ensure
 that they are only submitting work that they have rights to, we are requiring
-everyone to acknowldge this by signing their work.
+everyone to acknowledge this by signing their work.
 
 Any copyright notices in this repos should specify the authors as "The
 heptio/gangway authors".

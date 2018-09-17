@@ -16,6 +16,7 @@ PROJECT := gangway
 # Where to push the docker image.
 REGISTRY ?= gcr.io/heptio-images
 IMAGE := $(REGISTRY)/$(PROJECT)
+SRCDIRS := ./cmd/gangway
 
 VERSION ?= master
 
@@ -26,14 +27,39 @@ setup:
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/mjibson/esc/...
 
+check: test vet gofmt staticcheck unused misspell
+
 deps:
 	dep ensure -v
+
+vet: | test
+	go vet ./...
 
 bindata:
 	esc -o cmd/gangway/bindata.go templates/
 
 test:
 	go test -v ./...
+
+staticcheck:
+	@go get honnef.co/go/tools/cmd/staticcheck
+	staticcheck $(PKGS)
+
+unused:
+	@go get honnef.co/go/tools/cmd/unused
+	unused -exported $(PKGS)
+
+misspell:
+	@go get github.com/client9/misspell/cmd/misspell
+	misspell \
+		-i clas \
+		-locale US \
+		-error \
+		cmd/* docs/* *.md
+
+gofmt:  
+	@echo Checking code is gofmted
+	@test -z "$(shell gofmt -s -l -d -e $(SRCDIRS) | tee /dev/stderr)"
 
 image:
 	docker build . -t $(IMAGE):$(VERSION)
