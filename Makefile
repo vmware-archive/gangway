@@ -20,8 +20,13 @@ SRCDIRS := ./cmd/gangway
 
 VERSION ?= master
 
-all: deps bindata
+all: build
+
+build: deps bindata
 	go build ./...
+
+install: 
+	go install -v ./cmd/gangway/...
 
 setup:
 	go get -u github.com/golang/dep/cmd/dep
