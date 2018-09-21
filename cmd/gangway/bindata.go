@@ -253,14 +253,14 @@ Kd9ky2yZ3vyPXqyLfDr6hZfHlzfFf9nGy/XMKCGfXkdFPv0tuPgnAAD//yEDNLMoCAAA
 
 	"/templates/kubeconfig.tmpl": {
 		local:   "templates/kubeconfig.tmpl",
-		size:    601,
-		modtime: 1537502777,
+		size:    589,
+		modtime: 1537503171,
 		compressed: `
-H4sIAAAAAAAC/3SRQU8DIRCF7/yKSe+YmBgP3JrWQxNjTKvekZ1tJ21hM8BGs+5/N8CiW1NvvOGbeW9A
-d/SG7MlZBf2tMKfoA7JXQsJ0VgIAwCAHasnogFLHcHBM4VPBMMDNqnCrJXzBu/Z4f4fWwDjmPo/cIytY
-JHL5vNll/bp9hHFcCACrz3gx5kmfMTUbZwN+hJKknKckU6xrTek++nr5cNZ0KuX/bSIz2iCrxTXmSLZR
-sHK2pb3oGFtktAa9gmEUyS6H/LWY+eYwOVZ6NNmx66mpJUiLtbSvKu1GKQw1NUeSm3VdbYZ4NIxhju1y
-ZY5SI4M7oi3UZv2SxCXQSfI+IsvIpwnLunzQD8jYMvrDfNy2lP7MLI/gqDHfAQAA///PQzH+WQIAAA==
+H4sIAAAAAAAC/3SRQW/DIAyF7/wKq3cm7cqtaneoNE1Tu+2OiNNaTSAyEG2K8t8nIGzp1N149mfeM+iB
+PpA9OatgfBSmiz4geyUkLGclAAAMcqCWjA4odQwXxxS+FEwTPOwKt9vCPGfWI4/ICjapu309nLJ+Pz7D
+PG8EgNU93oy+6B7TsHE24Gco7uW8uC9R7g2lfvS1+dRr6kr5f5vIjDbIanGPuZJtFOycbeksBsYWGa1B
+r2CaRbLLIX8tVr45TI6VHkoO7EZqagnSYi2dq0q7UQpDTc2R5GFfV1shHg1jWGOnXFmj1MjgrmgLddi/
+JXELDJK8j8gycrdgWZcP+gEZW0Z/WV93LKU/d5ZHcNSY7wAAAP//w1bUIk0CAAA=
 `,
 	},
 
