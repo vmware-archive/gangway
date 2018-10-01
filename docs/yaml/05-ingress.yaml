@@ -5,14 +5,14 @@ metadata:
   namespace: gangway
   annotations:
     kubernetes.io/tls-acme: "true"
-    certmanager.k8s.io/cluster-issuer: "letsencrypt-prod"
+    certmanager.k8s.io/cluster-issuer: "letsencrypt-staging"
 spec:
   tls:
   - secretName: gangway
     hosts:
-    - gangway.example.com
+    - ${GANGWAY_HOST}
   rules:
-  - host: gangway.example.com
+  - host: ${GANGWAY_HOST}
     http:
       paths:
       - backend:

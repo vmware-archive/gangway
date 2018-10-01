@@ -1,19 +1,36 @@
 # Connecting Gangway to Auth0
-Make sure you configure RS256 signing.
 
-** Rule for adding group metadata**
+1. Create an account for Auth0 and login
+2. From the dashboard, click "New Application"
+3. Enter a name and choose "Single Page Web Applications"
+4. Click on "Settings" and gather the relevant information and update the file `docs/yaml/02-configmap.yaml` and apply to cluster
+5. Update the "Allowed Callback URLs" to match the "redirectURL" parameter in the configmap configured previously
+6. Click "Save Changes"
+7. Add Rule for adding group metadata by clicking on "Rules" from the menu
+8. Give the rule a name and copy/paste the following:
 
-```go
-function (user, context, callback) {
-    if (user.app_metadata && 'groups' in user.app_metadata) {
-        context.idToken.groups = user.app_metadata.groups;
-    } else {
-        context.idToken.groups = [];
+    ```go
+    function (user, context, callback) {
+        if (user.app_metadata && 'groups' in user.app_metadata) {
+            context.idToken.groups = user.app_metadata.groups;
+        } else {
+            context.idToken.groups = [];
+        }
+
+    callback(null, user, context);
     }
+    ```
 
-  callback(null, user, context);
-}
-```
+9. Configure API Server with the following config replacing issuer-url & client-id values:
+
+    ```
+    --oidc-issuer-url=https://example.auth0.com/
+    --oidc-client-id=<clientid>
+    --oidc-username-claim=email
+    --oidc-groups-claim=groups
+    ```
+
+## Example
 
 A typical gangway config for Auth0:
 

@@ -1,5 +1,6 @@
 
 gangway
+[![Build Status](https://travis-ci.org/heptiolabs/gangway.svg?branch=master)](https://travis-ci.org/heptiolabs/gangway)
 =======
 
 _(noun): An opening in the bulwark of the ship to allow passengers to board or leave the ship._
@@ -19,10 +20,10 @@ https://kubernetes.io/docs/admin/authentication/#configuring-the-api-server
 ```
 kube-apiserver
 ...
---oidc-issuer-url "https://example.auth0.com"
---oidc-client-id 3YM4ue8MoXgBkvCIHh00000000000
---oidc-username-claim sub
---oidc-groups-claim "https://example.auth0.com/groups"
+--oidc-issuer-url="https://example.auth0.com/"
+--oidc-client-id=3YM4ue8MoXgBkvCIHh00000000000
+--oidc-username-claim=email
+--oidc-groups-claim=groups
 ```
 
 ## Build

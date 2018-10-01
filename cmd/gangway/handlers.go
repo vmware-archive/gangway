@@ -143,6 +143,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, httpClient)
 
 	// verify the state string
 	state := r.URL.Query().Get("state")
@@ -159,7 +160,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// use the access code to retrieve a token
 	code := r.URL.Query().Get("code")
-	token, err := oauth2Cfg.Exchange(context.TODO(), code)
+	token, err := oauth2Cfg.Exchange(ctx, code)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

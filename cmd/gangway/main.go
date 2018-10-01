@@ -16,8 +16,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
@@ -33,6 +36,7 @@ import (
 var cfg *Config
 var oauth2Cfg *oauth2.Config
 var sessionStore *sessions.CookieStore
+var httpClient *http.Client
 
 // wrapper function for http logging
 func httpLogger(fn http.HandlerFunc) http.HandlerFunc {
@@ -54,18 +58,41 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.WithField("config", cfg).Info("active config")
-
 	oauth2Cfg = &oauth2.Config{
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  cfg.RedirectURL,
 		Scopes:       cfg.Scopes,
 		Endpoint: oauth2.Endpoint{
-			cfg.AuthorizeURL,
-			cfg.TokenURL,
+			AuthURL:  cfg.AuthorizeURL,
+			TokenURL: cfg.TokenURL,
 		},
 	}
+
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+
+	if cfg.TrustedCAPath != "" {
+		// Read in the cert file
+		certs, err := ioutil.ReadFile(cfg.TrustedCAPath)
+		if err != nil {
+			log.Fatalf("Failed to append %q to RootCAs: %v", cfg.TrustedCAPath, err)
+		}
+
+		// Append our cert to the system pool
+		if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+			log.Println("No certs appended, using system certs only")
+		}
+	}
+
+	// Trust the augmented cert pool in our client
+	config := &tls.Config{
+		RootCAs: rootCAs,
+	}
+	tr := &http.Transport{TLSClientConfig: config}
+	httpClient = &http.Client{Transport: tr}
 
 	initSessionStore()
 

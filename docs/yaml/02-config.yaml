@@ -28,20 +28,20 @@ data:
 
     # The cluster name. Used in UI and kubectl config instructions.
     # Env var: GANGWAY_CLUSTER_NAME
-    clusterName: "YourCluster"
+    clusterName: "${GANGWAY_CLUSTER_NAME}"
 
     # OAuth2 URL to start authorization flow.
     # Env var: GANGWAY_AUTHORIZE_URL
-    authorizeURL: "https://oauth.example.com/authorize"
+    authorizeURL: "https://${DNS_NAME}/authorize"
 
     # OAuth2 URL to obtain access tokens.
     # Env var: GANGWAY_TOKEN_URL
-    tokenURL: "https://oauth.example.com/oauth/token"
+    tokenURL: "https://${DNS_NAME}/oauth/token"
 
     # Endpoint that provides user profile information [optional]. Not all providers
     # will require this.
     # Env var: GANGWAY_AUDIENCE
-    audience: "https://oauth.example.com/userinfo"
+    audience: "https://${DNS_NAME}/userinfo"
 
     # Used to specify the scope of the requested Oauth authorization.
     # scopes: ["openid", "profile", "email", "offline_access"]
@@ -50,15 +50,15 @@ data:
     # Typically this also needs to be registered as part of the oauth application
     # with the oAuth provider.
     # Env var: GANGWAY_REDIRECT_URL
-    redirectURL: "https://gangway.yourcluster.com/callback"
+    redirectURL: "https://${GANGWAY_REDIRECT_URL}/callback"
 
     # API client ID as indicated by the identity provider
     # Env var: GANGWAY_CLIENT_ID
-    clientID: "<your client ID>"
+    clientID: "${GANGWAY_CLIENT_ID}"
 
     # API client secret as indicated by the identity provider
     # Env var: GANGWAY_CLIENT_SECRET
-    clientSecret: "<your client secret>"
+    clientSecret: "${GANGWAY_CLIENT_SECRET}"
 
     # The JWT claim to use as the username. This is used in UI.
     # Default is "nickname".
@@ -72,7 +72,7 @@ data:
 
     # The API server endpoint used to configure kubectl
     # Env var: GANGWAY_APISERVER_URL
-    apiServerURL: "mycluster.example.com"
+    apiServerURL: "https://${GANGWAY_APISERVER_URL}"
 
     # The path to find the CA bundle for the API server. Used to configure kubectl.
     # This is typically mounted into the default location for workloads running on
