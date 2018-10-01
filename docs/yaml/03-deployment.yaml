@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: gangway
-          image: gcr.io/heptio-images/gangway:v2.0.0
+          image: gcr.io/heptio-images/gangway:v2.1.0
           imagePullPolicy: Always
           command: ["gangway", "-config", "/gangway/gangway.yaml"]
           env:
