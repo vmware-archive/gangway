@@ -23,7 +23,7 @@ spec:
           imagePullPolicy: Always
           command: ["gangway", "-config", "/gangway/gangway.yaml"]
           env:
-            - name: GANGWAY_SESSION_SECURITY_KEY
+            - name: SESSION_SECURITY_KEY
               valueFrom:
                 secretKeyRef:
                   name: gangway-key
