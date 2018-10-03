@@ -6,7 +6,7 @@ go:
 sudo: false
 
 install:
-  - make setup && make deps
+  - make setup && make deps && make bindata
 
 script:
   - make check
