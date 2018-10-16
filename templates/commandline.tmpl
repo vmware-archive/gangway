@@ -49,9 +49,10 @@ $ chmod +x ./kubectl
 $ sudo mv ./kubectl /usr/local/bin/kubectl
              </code>
            </pre>
-            <p>
-                Once kubectl is installed, you may execute the following:</b>
-            </p>
+            <div class="row">
+                <div class="col s12 right-align"><a href="/kubeconf" class="btn-large waves-effect waves-light blue">Download Kubeconfig</a></div>
+                <div class="col s12">Once kubectl is installed, you may execute the following:</div>
+            </div>       
             <pre>
                <code class="language-bash">
 echo "{{ .ClusterCA }}" \ > ca-{{ .ClusterName }}.pem
@@ -67,9 +68,6 @@ kubectl config set-context {{ .ClusterName }} --cluster={{ .ClusterName }} --use
 kubectl config use-context {{ .ClusterName }}
               </code>
             </pre>
-            <div class="row right">
-                <a href="/kubeconf" class="btn-large waves-effect waves-light blue">Download Kubeconfig</a>
-            </div>
         </div>
     </body>
 </html>
