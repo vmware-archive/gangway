@@ -32,9 +32,9 @@ type Config struct {
 	TokenURL      string   `yaml:"tokenURL" envconfig:"token_url"`
 	ClientID      string   `yaml:"clientID" envconfig:"client_id"`
 	ClientSecret  string   `yaml:"clientSecret" envconfig:"client_secret"`
-	Audience      string   `yaml:"audience"`
+	Audience      string   `yaml:"audience" envconfig:"audience"`
 	RedirectURL   string   `yaml:"redirectURL" envconfig:"redirect_url"`
-	Scopes        []string `yaml:"scopes"`
+	Scopes        []string `yaml:"scopes" envconfig:"scopes"`
 	UsernameClaim string   `yaml:"usernameClaim" envconfig:"username_claim"`
 	EmailClaim    string   `yaml:"emailClaim" envconfig:"email_claim"`
 	ServeTLS      bool     `yaml:"serveTLS" envconfig:"serve_tls"`

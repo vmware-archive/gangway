@@ -36,6 +36,8 @@ func TestEnvionmentOverrides(t *testing.T) {
 	os.Setenv("GANGWAY_CLUSTER_CA_PATH", "/etc/ssl/certs/ca-certificates.crt")
 	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
 	os.Setenv("GANGWAY_TOKEN_URL", "https://foo.bar/token")
+	os.Setenv("GANGWAY_AUDIENCE", "foo")
+	os.Setenv("GANGWAY_SCOPES", "groups,sub")
 	cfg, err := NewConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)
@@ -43,5 +45,13 @@ func TestEnvionmentOverrides(t *testing.T) {
 
 	if cfg.Port != 1234 {
 		t.Errorf("Failed to override config with environment")
+	}
+
+	if cfg.Audience != "foo" {
+		t.Errorf("Failed to set audience via environment variable. Expected %s but got %s", "foo", cfg.Audience)
+	}
+
+	if cfg.Scopes[0] != "groups" || cfg.Scopes[1] != "sub" {
+		t.Errorf("Failed to set scopes via environment variable. Expected %s but got %s", "[groups, sub]", cfg.Scopes)
 	}
 }
