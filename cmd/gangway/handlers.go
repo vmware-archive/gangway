@@ -47,6 +47,11 @@ type userInfo struct {
 	IssuerURL    string
 	APIServerURL string
 	ClusterCA    string
+	HTTPPath     string
+}
+
+type homeInfo struct {
+	HTTPPath string
 }
 
 func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
@@ -94,12 +99,12 @@ func loginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := sessionStore.Get(r, "gangway")
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, cfg.getRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
 
 		if session.Values["id_token"] == nil {
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, cfg.getRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -108,7 +113,12 @@ func loginRequired(next http.Handler) http.Handler {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	serveTemplate("home.tmpl", nil, w)
+
+	data := &homeInfo{
+		HTTPPath: cfg.HTTPPath,
+	}
+
+	serveTemplate("home.tmpl", data, w)
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -139,7 +149,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	cleanupSession(w, r)
-	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, cfg.getRootPathPrefix(), http.StatusTemporaryRedirect)
 }
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -173,7 +183,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/commandline", http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("%s/commandline", cfg.HTTPPath), http.StatusSeeOther)
 }
 
 func parseToken(idToken string) (*jwt.Token, error) {
@@ -257,6 +267,7 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		IssuerURL:    issuerURL,
 		APIServerURL: cfg.APIServerURL,
 		ClusterCA:    string(caBytes),
+		HTTPPath:     cfg.HTTPPath,
 	}
 
 	generateKubeConfig("kubeconfig.tmpl", info)
