@@ -98,14 +98,14 @@ func main() {
 
 	loginRequiredHandlers := alice.New(loginRequired)
 
-	http.HandleFunc("/", httpLogger(homeHandler))
-	http.HandleFunc("/login", httpLogger(loginHandler))
-	http.HandleFunc("/callback", httpLogger(callbackHandler))
+	http.HandleFunc(cfg.getRootPathPrefix(), httpLogger(homeHandler))
+	http.HandleFunc(fmt.Sprintf("%s/login", cfg.HTTPPath), httpLogger(loginHandler))
+	http.HandleFunc(fmt.Sprintf("%s/callback", cfg.HTTPPath), httpLogger(callbackHandler))
 
 	// middleware'd routes
-	http.Handle("/logout", loginRequiredHandlers.ThenFunc(logoutHandler))
-	http.Handle("/commandline", loginRequiredHandlers.ThenFunc(commandlineHandler))
-	http.Handle("/kubeconf", loginRequiredHandlers.ThenFunc(kubeConfigHandler))
+	http.Handle(fmt.Sprintf("%s/logout", cfg.HTTPPath), loginRequiredHandlers.ThenFunc(logoutHandler))
+	http.Handle(fmt.Sprintf("%s/commandline", cfg.HTTPPath), loginRequiredHandlers.ThenFunc(commandlineHandler))
+	http.Handle(fmt.Sprintf("%s/kubeconf", cfg.HTTPPath), loginRequiredHandlers.ThenFunc(kubeConfigHandler))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	// create http server with timeouts

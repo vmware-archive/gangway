@@ -55,3 +55,36 @@ func TestEnvionmentOverrides(t *testing.T) {
 		t.Errorf("Failed to set scopes via environment variable. Expected %s but got %s", "[groups, sub]", cfg.Scopes)
 	}
 }
+
+func TestGetRootPathPrefix(t *testing.T) {
+	tests := map[string]struct {
+		path string
+		want string
+	}{
+		"not specified": {
+			path: "",
+			want: "/",
+		},
+		"specified": {
+			path: "/gangway",
+			want: "/gangway",
+		},
+		"specified default": {
+			path: "/",
+			want: "",
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			cfg := &Config{
+				HTTPPath: tc.path,
+			}
+
+			got := cfg.getRootPathPrefix()
+			if got != tc.want {
+				t.Fatalf("getRootPathPrefix(): want: %v, got: %v", tc.want, got)
+			}
+		})
+	}
+}

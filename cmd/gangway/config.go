@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
@@ -43,12 +44,14 @@ type Config struct {
 	APIServerURL  string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
 	ClusterCAPath string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
 	TrustedCAPath string   `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
+	HTTPPath      string   `yaml:"httpPath" envconfig:"http_path"`
 
 	SessionSecurityKey string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
 }
 
 // NewConfig returns a Config struct from serialized config file
 func NewConfig(configFile string) (*Config, error) {
+
 	cfg := &Config{
 		Host:          "0.0.0.0",
 		Port:          8080,
@@ -59,6 +62,7 @@ func NewConfig(configFile string) (*Config, error) {
 		CertFile:      "/etc/gangway/tls/tls.crt",
 		KeyFile:       "/etc/gangway/tls/tls.key",
 		ClusterCAPath: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
+		HTTPPath:      "",
 	}
 
 	if configFile != "" {
@@ -83,6 +87,9 @@ func NewConfig(configFile string) (*Config, error) {
 		return nil, err
 	}
 
+	// Check for trailing slash on HTTPPath and remove
+	cfg.HTTPPath = strings.TrimRight(cfg.HTTPPath, "/")
+
 	return cfg, nil
 }
 
@@ -106,4 +113,13 @@ func validateConfig(cfg *Config) error {
 		}
 	}
 	return nil
+}
+
+// getRootPathPrefix returns '/' if no prefix is specified, otherwise returns the configured path
+func (cfg *Config) getRootPathPrefix() string {
+	if len(cfg.HTTPPath) == 0 {
+		return "/"
+	}
+
+	return strings.TrimRight(cfg.HTTPPath, "/")
 }
