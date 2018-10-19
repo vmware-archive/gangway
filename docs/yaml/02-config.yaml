@@ -79,3 +79,7 @@ data:
     # a Kubernetes cluster and doesn't need to be set.
     # Env var: GANGWAY_CLUSTER_CA_PATH
     # cluster_ca_path: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+    # The path gangway uses to create urls (defaults to "")
+    # Env var: GANGWAY_HTTP_PATH
+    #httpPath: "https://${GANGWAY_HTTP_PATH}"
