@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package session
 
 import (
 	"net/http"
@@ -20,14 +20,11 @@ import (
 	"testing"
 
 	"github.com/gorilla/sessions"
-
 	log "github.com/sirupsen/logrus"
 )
 
 func TestGenerateSessionKeys(t *testing.T) {
-	cfg.SessionSecurityKey = "testing"
-
-	b1, b2 := generateSessionKeys()
+	b1, b2 := generateSessionKeys("testing")
 
 	if len(b1) != 64 || len(b2) != 32 {
 		t.Errorf("Wrong byte length's returned")
@@ -36,8 +33,8 @@ func TestGenerateSessionKeys(t *testing.T) {
 }
 
 func TestInitSessionStore(t *testing.T) {
-	initSessionStore()
-	if sessionStore == nil {
+	s := New("testing")
+	if s.Session == nil {
 		t.Errorf("Session Store is nil. Did not get initialized")
 		return
 	}
@@ -45,13 +42,12 @@ func TestInitSessionStore(t *testing.T) {
 }
 
 func TestCleanupSession(t *testing.T) {
-
-	initSessionStore()
+	s := New("testing")
 	session := &sessions.Session{}
 	// create a test http server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, _ = sessionStore.Get(r, "gangway")
-		cleanupSession(w, r)
+		session, _ = s.Session.Get(r, "gangway")
+		s.Cleanup(w, r)
 
 	}))
 	defer ts.Close()

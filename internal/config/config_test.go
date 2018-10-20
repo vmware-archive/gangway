@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package config
 
 import (
 	"os"
@@ -81,9 +81,9 @@ func TestGetRootPathPrefix(t *testing.T) {
 				HTTPPath: tc.path,
 			}
 
-			got := cfg.getRootPathPrefix()
+			got := cfg.GetRootPathPrefix()
 			if got != tc.want {
-				t.Fatalf("getRootPathPrefix(): want: %v, got: %v", tc.want, got)
+				t.Fatalf("GetRootPathPrefix(): want: %v, got: %v", tc.want, got)
 			}
 		})
 	}
