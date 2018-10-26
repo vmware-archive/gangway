@@ -56,7 +56,7 @@ $ sudo mv ./kubectl /usr/local/bin/kubectl
             <pre>
                <code class="language-bash">
 echo "{{ .ClusterCA }}" \ > ca-{{ .ClusterName }}.pem
-kubectl config set-cluster {{ .ClusterName }} --server={{ .APIServerURL }} --certificate-authority-data={{ .ClusterCA | base64enc }}
+kubectl config set-cluster {{ .ClusterName }} --server={{ .APIServerURL }} --certificate-authority=ca-{{ .ClusterName }}.pem --embed-certs
 kubectl config set-credentials {{ .Username }}@{{ .ClusterName }}  \
     --auth-provider=oidc  \
     --auth-provider-arg=idp-issuer-url={{ .IssuerURL }}  \
