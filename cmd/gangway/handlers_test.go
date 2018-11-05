@@ -15,16 +15,31 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/sessions"
+	"github.com/heptiolabs/gangway/internal/config"
+	"github.com/heptiolabs/gangway/internal/session"
+	"golang.org/x/oauth2"
 )
 
 func testInit() {
-	cfg = &Config{
-		SessionSecurityKey: "test",
+	gangwayUserSession = session.New("test")
+	transportConfig = config.NewTransportConfig("")
+
+	oauth2Cfg = &oauth2.Config{
+		ClientID:     "cfg.ClientID",
+		ClientSecret: "qwertyuiopasdfghjklzxcvbnm123456",
+		RedirectURL:  "cfg.RedirectURL",
 	}
-	initSessionStore()
+
+	o2token = &FakeToken{
+		OAuth2Cfg: oauth2Cfg,
+	}
 }
 
 func TestHomeHandler(t *testing.T) {
@@ -33,7 +48,7 @@ func TestHomeHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cfg = &Config{
+	cfg = &config.Config{
 		HTTPPath: "",
 	}
 
@@ -48,20 +63,163 @@ func TestHomeHandler(t *testing.T) {
 }
 
 func TestCallbackHandler(t *testing.T) {
-	testInit()
-
-	req, err := http.NewRequest("GET", "/callback", nil)
-	if err != nil {
-		t.Fatal(err)
+	tests := map[string]struct {
+		params             map[string]string
+		expectedStatusCode int
+	}{
+		"default": {
+			params: map[string]string{
+				"state": "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
+				"code":  "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
+			},
+			expectedStatusCode: http.StatusSeeOther,
+		},
 	}
 
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(callbackHandler)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var req *http.Request
+			var rsp *httptest.ResponseRecorder
+			var session *sessions.Session
+			var err error
 
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusForbidden {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+			cfg = &config.Config{
+				HTTPPath: "/foo",
+			}
+
+			// Init variables
+			rsp = NewRecorder()
+			testInit()
+			req, err = http.NewRequest("GET", "/callback", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Create request
+			if session, err = gangwayUserSession.Session.Get(req, "gangway"); err != nil {
+				t.Fatalf("Error getting session: %v", err)
+			}
+
+			// Create state session variable
+			session.Values["state"] = tc.params["state"]
+			if err = session.Save(req, rsp); err != nil {
+				t.Fatal(err)
+			}
+
+			// Add query params to request
+			q := req.URL.Query()
+			for k, v := range tc.params {
+				q.Add(k, v)
+			}
+			req.URL.RawQuery = q.Encode()
+
+			handler := http.HandlerFunc(callbackHandler)
+
+			// Call Handler
+			handler.ServeHTTP(rsp, req)
+
+			// Validate!
+			if status := rsp.Code; status != tc.expectedStatusCode {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, tc.expectedStatusCode)
+			}
+
+		})
+	}
+
+}
+func TestCommandLineHandler(t *testing.T) {
+	tests := map[string]struct {
+		params             map[string]string
+		emailClaim         string
+		usernameClaim      string
+		expectedStatusCode int
+	}{
+		"default": {
+			params: map[string]string{
+				"state":         "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
+				"id_token":      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
+				"refresh_token": "bar",
+				"code":          "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
+			},
+			expectedStatusCode: http.StatusOK,
+			emailClaim:         "Email",
+			usernameClaim:      "sub",
+		},
+		"missing email claim": {
+			params: map[string]string{
+				"state":         "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
+				"id_token":      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
+				"refresh_token": "bar",
+				"code":          "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
+			},
+			expectedStatusCode: http.StatusInternalServerError,
+			emailClaim:         "meh",
+			usernameClaim:      "sub",
+		},
+		"missing username claim": {
+			params: map[string]string{
+				"state":         "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
+				"id_token":      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
+				"refresh_token": "bar",
+				"code":          "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
+			},
+			expectedStatusCode: http.StatusInternalServerError,
+			emailClaim:         "Email",
+			usernameClaim:      "meh",
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var req *http.Request
+			var rsp *httptest.ResponseRecorder
+			var session *sessions.Session
+			var err error
+
+			cfg = &config.Config{
+				HTTPPath:      "/foo",
+				EmailClaim:    tc.emailClaim,
+				UsernameClaim: tc.usernameClaim,
+			}
+
+			// Init variables
+			rsp = NewRecorder()
+			testInit()
+			req, err = http.NewRequest("GET", "/callback", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Create request
+			if session, err = gangwayUserSession.Session.Get(req, "gangway"); err != nil {
+				t.Fatalf("Error getting session: %v", err)
+			}
+
+			// Create state session variable
+			session.Values["state"] = tc.params["state"]
+			session.Values["id_token"] = tc.params["id_token"]
+			session.Values["refresh_token"] = tc.params["refresh_token"]
+			if err = session.Save(req, rsp); err != nil {
+				t.Fatal(err)
+			}
+
+			// Add query params to request
+			q := req.URL.Query()
+			for k, v := range tc.params {
+				q.Add(k, v)
+			}
+			req.URL.RawQuery = q.Encode()
+
+			handler := http.HandlerFunc(commandlineHandler)
+
+			// Call Handler
+			handler.ServeHTTP(rsp, req)
+
+			// Validate!
+			if status := rsp.Code; status != tc.expectedStatusCode {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, tc.expectedStatusCode)
+			}
+		})
 	}
 }
 
@@ -73,7 +231,7 @@ func TestUnauthedCommandlineHandlerRedirect(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	initSessionStore()
+	session.New("test")
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(commandlineHandler)
@@ -85,11 +243,22 @@ func TestUnauthedCommandlineHandlerRedirect(t *testing.T) {
 	}
 }
 
-func TestParseToken(t *testing.T) {
-	idToken := "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.EkN-DOsnsuRjRO6BxXemmJDm3HbxrbRzXglbN2S4sOkopdU4IsDxTI8jO19W_A4K8ZPJijNLis4EZsHeY559a4DFOd50_OqgHGuERTqYZyuhtF39yxJPAjUESwxk2J5k_4zM3O-vtd1Ghyo4IbqKKSy6J9mTniYJPenn5-HIirE"
-	token, _ := parseToken(idToken)
-
-	if token.Raw != idToken {
-		t.Errorf("Error parsing token. Expect raw token to be %s, but instead got %s", idToken, token.Raw)
+// NewRecorder returns an initialized ResponseRecorder.
+func NewRecorder() *httptest.ResponseRecorder {
+	return &httptest.ResponseRecorder{
+		HeaderMap: make(http.Header),
+		Body:      new(bytes.Buffer),
 	}
+}
+
+type FakeToken struct {
+	OAuth2Cfg *oauth2.Config
+}
+
+// Exchange takes an oauth2 auth token and exchanges for an id_token
+func (f *FakeToken) Exchange(ctx context.Context, code string) (*oauth2.Token, error) {
+	return &oauth2.Token{
+		AccessToken:  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
+		RefreshToken: "4567",
+	}, nil
 }

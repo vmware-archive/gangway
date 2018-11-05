@@ -27,6 +27,7 @@ import (
 	"text/template"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/heptiolabs/gangway/internal/oidc"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -36,6 +37,7 @@ const (
 	kubeConfigFile = "gangway.kubeconfig"
 )
 
+// userInfo stores information about an authenticated user
 type userInfo struct {
 	ClusterName  string
 	Username     string
@@ -50,12 +52,12 @@ type userInfo struct {
 	HTTPPath     string
 }
 
+// homeInfo is used to store dynamic properties on
 type homeInfo struct {
 	HTTPPath string
 }
 
 func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
-
 	templatePath := filepath.Join(templatesBase, tmplFile)
 	templateData, err := FSString(false, templatePath)
 	if err != nil {
@@ -97,14 +99,14 @@ func generateKubeConfig(tmplFile string, data interface{}) {
 
 func loginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := sessionStore.Get(r, "gangway")
+		session, err := gangwayUserSession.Session.Get(r, "gangway")
 		if err != nil {
-			http.Redirect(w, r, cfg.getRootPathPrefix(), http.StatusTemporaryRedirect)
+			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
 
 		if session.Values["id_token"] == nil {
-			http.Redirect(w, r, cfg.getRootPathPrefix(), http.StatusTemporaryRedirect)
+			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -113,7 +115,6 @@ func loginRequired(next http.Handler) http.Handler {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-
 	data := &homeInfo{
 		HTTPPath: cfg.HTTPPath,
 	}
@@ -127,7 +128,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	rand.Read(b)
 	state := base64.StdEncoding.EncodeToString(b)
 
-	session, err := sessionStore.Get(r, "gangway")
+	session, err := gangwayUserSession.Session.Get(r, "gangway")
 	if err != nil {
 		log.Errorf("Got an error in login: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -148,16 +149,17 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	cleanupSession(w, r)
-	http.Redirect(w, r, cfg.getRootPathPrefix(), http.StatusTemporaryRedirect)
+	gangwayUserSession.Cleanup(w, r)
+	http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 }
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, httpClient)
+	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, transportConfig.HTTPClient)
 
 	// verify the state string
 	state := r.URL.Query().Get("state")
-	session, err := sessionStore.Get(r, "gangway")
+
+	session, err := gangwayUserSession.Session.Get(r, "gangway")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -170,7 +172,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// use the access code to retrieve a token
 	code := r.URL.Query().Get("code")
-	token, err := oauth2Cfg.Exchange(ctx, code)
+	token, err := o2token.Exchange(ctx, code)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -186,16 +188,6 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("%s/commandline", cfg.HTTPPath), http.StatusSeeOther)
 }
 
-func parseToken(idToken string) (*jwt.Token, error) {
-	token, _ := jwt.Parse(idToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error")
-		}
-		return []byte(cfg.ClientSecret), nil
-	})
-	return token, nil
-}
-
 func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 
 	// read in public ca.crt to output in commandline copy/paste commands
@@ -208,7 +200,7 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	caBytes, err := ioutil.ReadAll(file)
 
-	session, err := sessionStore.Get(r, "gangway")
+	session, err := gangwayUserSession.Session.Get(r, "gangway")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -216,21 +208,19 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 
 	idToken, ok := session.Values["id_token"].(string)
 	if !ok {
-		//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		cleanupSession(w, r)
+		gangwayUserSession.Cleanup(w, r)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
 	refreshToken, ok := session.Values["refresh_token"].(string)
 	if !ok {
-		//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		cleanupSession(w, r)
+		gangwayUserSession.Cleanup(w, r)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
-	jwtToken, err := parseToken(idToken)
+	jwtToken, err := oidc.ParseToken(idToken, cfg.ClientSecret)
 	if err != nil {
 		http.Error(w, "Could not parse JWT", http.StatusInternalServerError)
 		return

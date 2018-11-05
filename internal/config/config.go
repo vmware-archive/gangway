@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package config
 
 import (
 	"fmt"
@@ -82,7 +82,7 @@ func NewConfig(configFile string) (*Config, error) {
 		return nil, err
 	}
 
-	err = validateConfig(cfg)
+	err = cfg.Validate()
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,8 @@ func NewConfig(configFile string) (*Config, error) {
 	return cfg, nil
 }
 
-func validateConfig(cfg *Config) error {
+// Validate verifies all properties of config struct are intialized
+func (cfg *Config) Validate() error {
 	checks := []struct {
 		bad    bool
 		errMsg string
@@ -115,8 +116,8 @@ func validateConfig(cfg *Config) error {
 	return nil
 }
 
-// getRootPathPrefix returns '/' if no prefix is specified, otherwise returns the configured path
-func (cfg *Config) getRootPathPrefix() string {
+// GetRootPathPrefix returns '/' if no prefix is specified, otherwise returns the configured path
+func (cfg *Config) GetRootPathPrefix() string {
 	if len(cfg.HTTPPath) == 0 {
 		return "/"
 	}

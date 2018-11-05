@@ -16,27 +16,27 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/gorilla/sessions"
+	"github.com/heptiolabs/gangway/internal/config"
+	"github.com/heptiolabs/gangway/internal/oidc"
+	"github.com/heptiolabs/gangway/internal/session"
 	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
-var cfg *Config
+var cfg *config.Config
 var oauth2Cfg *oauth2.Config
-var sessionStore *sessions.CookieStore
-var httpClient *http.Client
+var o2token oidc.OAuth2Token
+var gangwayUserSession *session.Session
+var transportConfig *config.TransportConfig
 
 // wrapper function for http logging
 func httpLogger(fn http.HandlerFunc) http.HandlerFunc {
@@ -47,12 +47,11 @@ func httpLogger(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
-
 	cfgFile := flag.String("config", "", "The config file to use.")
 	flag.Parse()
 
 	var err error
-	cfg, err = NewConfig(*cfgFile)
+	cfg, err = config.NewConfig(*cfgFile)
 	if err != nil {
 		log.Errorf("Could not parse config file: %s", err)
 		os.Exit(1)
@@ -69,36 +68,16 @@ func main() {
 		},
 	}
 
-	rootCAs, _ := x509.SystemCertPool()
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
+	o2token = &oidc.Token{
+		OAuth2Cfg: oauth2Cfg,
 	}
 
-	if cfg.TrustedCAPath != "" {
-		// Read in the cert file
-		certs, err := ioutil.ReadFile(cfg.TrustedCAPath)
-		if err != nil {
-			log.Fatalf("Failed to append %q to RootCAs: %v", cfg.TrustedCAPath, err)
-		}
-
-		// Append our cert to the system pool
-		if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
-			log.Println("No certs appended, using system certs only")
-		}
-	}
-
-	// Trust the augmented cert pool in our client
-	config := &tls.Config{
-		RootCAs: rootCAs,
-	}
-	tr := &http.Transport{TLSClientConfig: config}
-	httpClient = &http.Client{Transport: tr}
-
-	initSessionStore()
+	transportConfig = config.NewTransportConfig(cfg.TrustedCAPath)
+	gangwayUserSession = session.New(cfg.SessionSecurityKey)
 
 	loginRequiredHandlers := alice.New(loginRequired)
 
-	http.HandleFunc(cfg.getRootPathPrefix(), httpLogger(homeHandler))
+	http.HandleFunc(cfg.GetRootPathPrefix(), httpLogger(homeHandler))
 	http.HandleFunc(fmt.Sprintf("%s/login", cfg.HTTPPath), httpLogger(loginHandler))
 	http.HandleFunc(fmt.Sprintf("%s/callback", cfg.HTTPPath), httpLogger(callbackHandler))
 
@@ -136,5 +115,4 @@ func main() {
 	log.Println("Shutdown signal received, exiting.")
 	// close the HTTP server
 	httpServer.Shutdown(context.Background())
-
 }

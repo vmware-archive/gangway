@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package session
 
 import (
 	"crypto/sha256"
@@ -24,26 +24,34 @@ import (
 
 const salt = "MkmfuPNHnZBBivy0L0aW"
 
-func generateSessionKeys() ([]byte, []byte) {
+// Session defines a Gangway session
+type Session struct {
+	Session *sessions.CookieStore
+}
+
+// New inits a Session with CookieStore
+func New(sessionSecurityKey string) *Session {
+	return &Session{
+		Session: sessions.NewCookieStore(generateSessionKeys(sessionSecurityKey)),
+	}
+}
+
+// generateSessionKeys creates a signed encryption key for the cookie store
+func generateSessionKeys(sessionSecurityKey string) ([]byte, []byte) {
 	// Take the configured security key and generate 96 bytes of data. This is
 	// used as the signing and encryption keys for the cookie store.  For details
 	// on the PBKDF2 function: https://en.wikipedia.org/wiki/PBKDF2
 	b := pbkdf2.Key(
-		[]byte(cfg.SessionSecurityKey),
+		[]byte(sessionSecurityKey),
 		[]byte(salt),
 		4096, 96, sha256.New)
 
 	return b[0:64], b[64:96]
 }
 
-func initSessionStore() {
-
-	sessionStore = sessions.NewCookieStore(generateSessionKeys())
-}
-
-func cleanupSession(w http.ResponseWriter, r *http.Request) {
-
-	session, err := sessionStore.Get(r, "gangway")
+// Cleanup removes the current session from the store
+func (s *Session) Cleanup(w http.ResponseWriter, r *http.Request) {
+	session, err := s.Session.Get(r, "gangway")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
