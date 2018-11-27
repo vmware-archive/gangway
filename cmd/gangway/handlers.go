@@ -99,13 +99,13 @@ func generateKubeConfig(tmplFile string, data interface{}) {
 
 func loginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := gangwayUserSession.Session.Get(r, "gangway")
+		sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
 		if err != nil {
 			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
 
-		if session.Values["id_token"] == nil {
+		if sessionIDToken.Values["id_token"] == nil {
 			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
@@ -149,7 +149,9 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	gangwayUserSession.Cleanup(w, r)
+	gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
+	gangwayUserSession.Cleanup(w, r, "gangway_id_token")
+	gangwayUserSession.Cleanup(w, r, "gangway")
 	http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 }
 
@@ -178,13 +180,32 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values["id_token"] = token.Extra("id_token")
-	session.Values["refresh_token"] = token.RefreshToken
-	err = session.Save(r, w)
+	// save the id_token to a session
+	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	sessionIDToken.Values["id_token"] = token.Extra("id_token")
+	err = sessionIDToken.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// save the refresh_token to a session
+	sessionRefreshToken, err := gangwayUserSession.Session.Get(r, "gangway_refresh_token")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sessionRefreshToken.Values["refresh_token"] = token.RefreshToken
+	err = sessionRefreshToken.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	http.Redirect(w, r, fmt.Sprintf("%s/commandline", cfg.HTTPPath), http.StatusSeeOther)
 }
 
@@ -200,22 +221,31 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	caBytes, err := ioutil.ReadAll(file)
 
-	session, err := gangwayUserSession.Session.Get(r, "gangway")
+	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	idToken, ok := session.Values["id_token"].(string)
+	idToken, ok := sessionIDToken.Values["id_token"].(string)
 	if !ok {
-		gangwayUserSession.Cleanup(w, r)
+		gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
+		gangwayUserSession.Cleanup(w, r, "gangway_id_token")
+		gangwayUserSession.Cleanup(w, r, "gangway")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
-	refreshToken, ok := session.Values["refresh_token"].(string)
+	sessionRefreshToken, err := gangwayUserSession.Session.Get(r, "gangway_refresh_token")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	refreshToken, ok := sessionRefreshToken.Values["refresh_token"].(string)
 	if !ok {
-		gangwayUserSession.Cleanup(w, r)
+		gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
+		gangwayUserSession.Cleanup(w, r, "gangway_id_token")
+		gangwayUserSession.Cleanup(w, r, "gangway")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}

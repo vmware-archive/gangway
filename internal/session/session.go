@@ -16,7 +16,6 @@ package session
 
 import (
 	"crypto/sha256"
-	"math"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -27,18 +26,13 @@ const salt = "MkmfuPNHnZBBivy0L0aW"
 
 // Session defines a Gangway session
 type Session struct {
-	//Session2 *sessions.CookieStore
-	Session *sessions.FilesystemStore
+	Session *sessions.CookieStore
 }
 
 // New inits a Session with CookieStore
 func New(sessionSecurityKey string) *Session {
-	k1, k2 := generateSessionKeys(sessionSecurityKey)
-	store := sessions.NewFilesystemStore("", k1, k2)
-	store.MaxLength(math.MaxInt64)
 	return &Session{
-		//Session2: sessions.NewCookieStore(sessionKey),
-		Session: store,
+		Session: sessions.NewCookieStore(generateSessionKeys(sessionSecurityKey)),
 	}
 }
 
@@ -56,8 +50,8 @@ func generateSessionKeys(sessionSecurityKey string) ([]byte, []byte) {
 }
 
 // Cleanup removes the current session from the store
-func (s *Session) Cleanup(w http.ResponseWriter, r *http.Request) {
-	session, err := s.Session.Get(r, "gangway")
+func (s *Session) Cleanup(w http.ResponseWriter, r *http.Request, name string) {
+	session, err := s.Session.Get(r, name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
