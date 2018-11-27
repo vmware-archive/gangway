@@ -102,7 +102,6 @@ func (cfg *Config) Validate() error {
 		{cfg.AuthorizeURL == "", "no authorizeURL specified"},
 		{cfg.TokenURL == "", "no tokenURL specified"},
 		{cfg.ClientID == "", "no clientID specified"},
-		{cfg.ClientSecret == "", "no clientSecret specified"},
 		{cfg.RedirectURL == "", "no redirectURL specified"},
 		{cfg.SessionSecurityKey == "", "no SessionSecurityKey specified"},
 		{cfg.APIServerURL == "", "no apiServerURL specified"},
