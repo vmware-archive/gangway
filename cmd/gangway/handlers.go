@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/dgrijalva/jwt-go"
@@ -232,12 +233,14 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not parse Username claim", http.StatusInternalServerError)
 		return
 	}
-
-	email, ok := claims[cfg.EmailClaim].(string)
-	if !ok {
-		http.Error(w, "Could not parse Email claim", http.StatusInternalServerError)
-		log.Println("email Handler")
-		return
+	email := strings.Join([]string{username, cfg.ClusterName}, "@")
+	if cfg.EmailClaim != "" {
+		email, ok = claims[cfg.EmailClaim].(string)
+		if !ok {
+			http.Error(w, "Could not parse Email claim", http.StatusInternalServerError)
+			log.Warn("using the Email Claim config setting is deprecated. In future Gangway will use `UsernameClaim@ClusterName`")
+			return
+		}
 	}
 
 	issuerURL, ok := claims["iss"].(string)
