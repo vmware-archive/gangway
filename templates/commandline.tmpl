@@ -36,7 +36,7 @@
                 Welcome {{ .Username }}.
             </h4>
             <h5>
-                In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authenication for your client.
+                In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authentication for your client.
             </h5>
             <br>
             <p>
@@ -52,7 +52,7 @@ $ sudo mv ./kubectl /usr/local/bin/kubectl
             <div class="row">
                 <div class="col s12 right-align"><a href="{{ .HTTPPath }}/kubeconf" class="btn-large waves-effect waves-light blue">Download Kubeconfig</a></div>
                 <div class="col s12">Once kubectl is installed, you may execute the following:</div>
-            </div>       
+            </div>
             <pre>
                <code class="language-bash">
 echo "{{ .ClusterCA }}" \ > ca-{{ .ClusterName }}.pem
