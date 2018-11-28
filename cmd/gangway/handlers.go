@@ -249,6 +249,10 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if cfg.ClientSecret == "" {
+		log.Warn("Setting an empty Client Secret should only be done if you have no other option and is an inherent security risk.")
+	}
+
 	info := &userInfo{
 		ClusterName:  cfg.ClusterName,
 		Username:     username,

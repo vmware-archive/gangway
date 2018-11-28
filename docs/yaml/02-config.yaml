@@ -60,6 +60,12 @@ data:
     # Env var: GANGWAY_CLIENT_SECRET
     clientSecret: "${GANGWAY_CLIENT_SECRET}"
 
+    # Some identity providers accept an empty client secret, this
+    # is not generally considered a good idea. If you have to use an
+    # empty secret and accept the risks that come with that then you can
+    # set this to true.
+    #allowEmptyClientSecret: false
+
     # The JWT claim to use as the username. This is used in UI.
     # Default is "nickname". This is combined with the clusterName
     # for the "user" portion of the kubeconfig.
