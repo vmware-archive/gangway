@@ -61,14 +61,10 @@ data:
     clientSecret: "${GANGWAY_CLIENT_SECRET}"
 
     # The JWT claim to use as the username. This is used in UI.
-    # Default is "nickname".
+    # Default is "nickname". This is combined with the clusterName
+    # for the "user" portion of the kubeconfig.
     # Env var: GANGWAY_USERNAME_CLAIM
     usernameClaim: "sub"
-
-    # The JWT claim to use as the email claim. This is used to name the
-    # "user" part of the config. Default is "email".
-    # Env var: GANGWAY_EMAIL_CLAIM
-    emailClaim: "email"
 
     # The API server endpoint used to configure kubectl
     # Env var: GANGWAY_APISERVER_URL
@@ -79,6 +75,10 @@ data:
     # a Kubernetes cluster and doesn't need to be set.
     # Env var: GANGWAY_CLUSTER_CA_PATH
     # cluster_ca_path: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+    # The path to a root CA to trust for self signed certificates at the Oauth2 URLs
+    # Env var: GANGWAY_TRUSTED_CA_PATH
+    #trustedCAPath: /cacerts/rootca.crt
 
     # The path gangway uses to create urls (defaults to "")
     # Env var: GANGWAY_HTTP_PATH
