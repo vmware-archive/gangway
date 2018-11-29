@@ -197,6 +197,7 @@ func TestCommandLineHandler(t *testing.T) {
 				EmailClaim:    tc.emailClaim,
 				UsernameClaim: tc.usernameClaim,
 				ClusterName:   "cluster1",
+				APIServerURL:  "https://kubernetes",
 			}
 
 			// Init variables

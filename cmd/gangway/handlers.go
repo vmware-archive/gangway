@@ -27,10 +27,13 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ghodss/yaml"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/heptiolabs/gangway/internal/oidc"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 const (
@@ -72,30 +75,73 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 	tmpl.ExecuteTemplate(w, tmplFile, data)
 }
 
-func generateKubeConfig(tmplFile string, data interface{}) {
-	templatePath := filepath.Join(templatesBase, tmplFile)
-	templateData, err := FSString(false, templatePath)
-	if err != nil {
-		log.Errorf("Failed to find template asset: %s", tmplFile)
-		return
+func generateKubeConfig(tmplFile string, cfg *userInfo) clientcmdapi.Config {
+	// configure the cluster
+	caData := []byte{}
+	base64.StdEncoding.Encode(caData, []byte(cfg.ClusterCA))
+
+	// fill out kubeconfig structure
+	kcfg := clientcmdapi.Config{
+		Kind:           "Config",
+		APIVersion:     "v1",
+		CurrentContext: cfg.ClusterName,
+		Clusters: []clientcmdapi.NamedCluster{
+			{
+				Name: cfg.ClusterName,
+				Cluster: clientcmdapi.Cluster{
+					Server: cfg.APIServerURL,
+					CertificateAuthorityData: caData,
+				},
+			},
+		},
+		Contexts: []clientcmdapi.NamedContext{
+			{
+				Name: cfg.Email,
+				Context: clientcmdapi.Context{
+					Cluster:  cfg.ClusterName,
+					AuthInfo: cfg.Email,
+				},
+			},
+		},
+		AuthInfos: []clientcmdapi.NamedAuthInfo{
+			{
+				Name: cfg.Email,
+				AuthInfo: clientcmdapi.AuthInfo{
+					Username: cfg.Email,
+					AuthProvider: &clientcmdapi.AuthProviderConfig{
+						Name: "oidc",
+						Config: map[string]string{
+							"client-id":      cfg.ClientID,
+							"client-secret":  cfg.ClientID,
+							"id-token":       cfg.IDToken,
+							"idp-issuer-url": cfg.IssuerURL,
+							"refresh-token":  cfg.RefreshToken,
+						},
+					},
+				},
+			},
+		},
 	}
 
+	//kcfg.Contexts = nil
 	// open file for writing
 	f, err := os.Create(kubeConfigFile)
 	// create buffered io writer
 	w := bufio.NewWriter(f)
 
-	tmpl := template.New(tmplFile).Funcs(FuncMap())
-	tmpl, err = tmpl.Parse(string(templateData))
+	d, err := yaml.Marshal(&kcfg)
+
 	if err != nil {
-		log.Errorf("Error parsing kubeconfig template: %s", err)
+		log.Fatalf("error: %v", err)
 	}
-	err = tmpl.ExecuteTemplate(w, tmplFile, data)
+
+	w.Write(d)
 	if err != nil {
 		log.Errorf("Error executing kubeconf template: %s", err)
 	}
 	// flush file data to disk
 	w.Flush()
+	return kcfg
 }
 
 func loginRequired(next http.Handler) http.Handler {
