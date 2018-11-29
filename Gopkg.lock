@@ -10,6 +10,22 @@
   version = "v3.1.0"
 
 [[projects]]
+  digest = "1:b13707423743d41665fd23f0c36b2f37bb49c30e94adb813319c44188a51ba22"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = ""
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:6e73003ecd35f4487a5e88270d3ca0a81bc80dc88053ac7e4dcfec5fba30d918"
+  name = "github.com/gogo/protobuf"
+  packages = ["proto"]
+  pruneopts = ""
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   digest = "1:3b760d3b93f994df8eb1d9ebfad17d3e9e37edcb7f7efaa15b427c0d7a64f4e4"
   name = "github.com/golang/protobuf"
@@ -133,11 +149,50 @@
   pruneopts = ""
   revision = "eb3733d160e74a9c7e442f435eb3bea458e1d19f"
 
+[[projects]]
+  branch = "master"
+  digest = "1:66b0292f815d508d11ed5fe94fdeb0bcc5a988703a08e73bf3cb3a415de676cf"
+  name = "k8s.io/apimachinery"
+  packages = [
+    "pkg/conversion",
+    "pkg/conversion/queryparams",
+    "pkg/runtime",
+    "pkg/runtime/schema",
+    "pkg/util/errors",
+    "pkg/util/json",
+    "pkg/util/naming",
+    "pkg/util/runtime",
+    "pkg/util/sets",
+    "third_party/forked/golang/reflect",
+  ]
+  pruneopts = ""
+  revision = "4a9a8137c0a17bc4594f544987b3f0d48b2e3d3a"
+
+[[projects]]
+  digest = "1:5d4153d12c3aed2c90a94262520d2498d5afa4d692554af55e65a7c5af0bc399"
+  name = "k8s.io/client-go"
+  packages = [
+    "tools/clientcmd/api",
+    "tools/clientcmd/api/v1",
+  ]
+  pruneopts = ""
+  revision = "1638f8970cefaa404ff3a62950f88b08292b2696"
+  version = "v9.0.0"
+
+[[projects]]
+  digest = "1:4f5eb833037cc0ba0bf8fe9cae6be9df62c19dd1c869415275c708daa8ccfda5"
+  name = "k8s.io/klog"
+  packages = ["."]
+  pruneopts = ""
+  revision = "a5bc97fbc634d635061f3146511332c7e313a55a"
+  version = "v0.1.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/dgrijalva/jwt-go",
+    "github.com/ghodss/yaml",
     "github.com/gorilla/sessions",
     "github.com/justinas/alice",
     "github.com/kelseyhightower/envconfig",
@@ -145,6 +200,7 @@
     "golang.org/x/crypto/pbkdf2",
     "golang.org/x/oauth2",
     "gopkg.in/yaml.v2",
+    "k8s.io/client-go/tools/clientcmd/api/v1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
