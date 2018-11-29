@@ -17,8 +17,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/gorilla/sessions"
@@ -129,10 +132,11 @@ func TestCallbackHandler(t *testing.T) {
 }
 func TestCommandLineHandler(t *testing.T) {
 	tests := map[string]struct {
-		params             map[string]string
-		emailClaim         string
-		usernameClaim      string
-		expectedStatusCode int
+		params                     map[string]string
+		emailClaim                 string
+		usernameClaim              string
+		expectedStatusCode         int
+		expectedUsernameInTemplate string
 	}{
 		"default": {
 			params: map[string]string{
@@ -141,11 +145,12 @@ func TestCommandLineHandler(t *testing.T) {
 				"refresh_token": "bar",
 				"code":          "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
 			},
-			expectedStatusCode: http.StatusOK,
-			emailClaim:         "Email",
-			usernameClaim:      "sub",
+			expectedStatusCode:         http.StatusOK,
+			expectedUsernameInTemplate: "gangway@heptio.com",
+			emailClaim:                 "Email",
+			usernameClaim:              "sub",
 		},
-		"missing email claim": {
+		"incorrect email claim": {
 			params: map[string]string{
 				"state":         "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
 				"id_token":      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
@@ -156,7 +161,7 @@ func TestCommandLineHandler(t *testing.T) {
 			emailClaim:         "meh",
 			usernameClaim:      "sub",
 		},
-		"missing username claim": {
+		"incorrect username claim": {
 			params: map[string]string{
 				"state":         "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
 				"id_token":      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
@@ -166,6 +171,17 @@ func TestCommandLineHandler(t *testing.T) {
 			expectedStatusCode: http.StatusInternalServerError,
 			emailClaim:         "Email",
 			usernameClaim:      "meh",
+		},
+		"no email claim": {
+			params: map[string]string{
+				"state":         "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
+				"id_token":      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
+				"refresh_token": "bar",
+				"code":          "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
+			},
+			expectedStatusCode:         http.StatusOK,
+			expectedUsernameInTemplate: "gangway@heptio.com@cluster1",
+			usernameClaim:              "sub",
 		},
 	}
 
@@ -180,6 +196,7 @@ func TestCommandLineHandler(t *testing.T) {
 				HTTPPath:      "/foo",
 				EmailClaim:    tc.emailClaim,
 				UsernameClaim: tc.usernameClaim,
+				ClusterName:   "cluster1",
 			}
 
 			// Init variables
@@ -218,6 +235,16 @@ func TestCommandLineHandler(t *testing.T) {
 			// Validate!
 			if status := rsp.Code; status != tc.expectedStatusCode {
 				t.Errorf("handler returned wrong status code: got %v want %v", status, tc.expectedStatusCode)
+			}
+			// if response code is OK then check that username is correct in resultant template
+			if rsp.Code == 200 {
+				bodyBytes, _ := ioutil.ReadAll(rsp.Body)
+				bodyString := string(bodyBytes)
+				re := regexp.MustCompile("--user=(.+)")
+				found := re.FindString(bodyString)
+				if !strings.Contains(found, tc.expectedUsernameInTemplate) {
+					t.Errorf("template should contain --user=%s but found %s", tc.expectedUsernameInTemplate, found)
+				}
 			}
 		})
 	}
