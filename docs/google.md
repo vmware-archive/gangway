@@ -35,6 +35,9 @@ authorizeUrl: "https://accounts.google.com/o/oauth2/auth"
 
 # URL to get a token from
 # leave as is unless Google instructs you otherwise
+#
+# kube-apiserver 1.10+
+# the OpenID Connect authenticator no longer accepts tokens from the Google v3 token APIs; users must switch to the "https://www.googleapis.com/oauth2/v4/token" endpoint.
 tokenUrl: "https://accounts.google.com/o/oauth2/token"
 
 # API Client ID. Get from Google credentials "client_id" field
