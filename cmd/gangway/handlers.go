@@ -102,7 +102,7 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 			{
 				Name: cfg.ClusterName,
 				Cluster: clientcmdapi.Cluster{
-					Server:                   cfg.APIServerURL,
+					Server: cfg.APIServerURL,
 					CertificateAuthorityData: []byte(cfg.ClusterCA),
 				},
 			},
@@ -291,28 +291,28 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	// read in public ca.crt to output in commandline copy/paste commands
 	file, err := os.Open(cfg.ClusterCAPath)
 	if err != nil {
-		// let us know that we couldn't open the file. This only cause missing output
+		// let us know that we couldn't open the file. This only causes missing output
 		// does not impact actual function of program
 		log.Errorf("Failed to open CA file. %s", err)
 	}
 	defer file.Close()
 	caBytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		// let us know that we couldn't open the file. This only cause missing output
+		// let us know that we couldn't open the file. This only causes missing output
 		// does not impact actual function of program
 		log.Warningf("Could not read CA file: %s", err)
 	}
-	// read in public trustedca.crt to output in commandline copy/paste commands
+	// read in trusted ca cert to output in commandline copy/paste commands
 	file, err = os.Open(cfg.TrustedCAPath)
 	if err != nil {
-		// let us know that we couldn't open the file. This only cause missing output
+		// let us know that we couldn't open the file. This only causes missing output
 		// does not impact actual function of program
 		log.Errorf("Failed to open TrustedCA file. %s", err)
 	}
 	defer file.Close()
 	trustedCABytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		// let us know that we couldn't open the file. This only cause missing output
+		// let us know that we couldn't open the file. This only causes missing output
 		// does not impact actual function of program
 		log.Warningf("Failed to read TrustedCA file. %s", err)
 	}
