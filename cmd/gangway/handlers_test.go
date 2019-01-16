@@ -190,6 +190,8 @@ func TestCommandLineHandler(t *testing.T) {
 			var req *http.Request
 			var rsp *httptest.ResponseRecorder
 			var session *sessions.Session
+			var sessionIDToken *sessions.Session
+			var sessionRefreshToken *sessions.Session
 			var err error
 
 			cfg = &config.Config{
@@ -211,12 +213,24 @@ func TestCommandLineHandler(t *testing.T) {
 			if session, err = gangwayUserSession.Session.Get(req, "gangway"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
+			if sessionIDToken, err = gangwayUserSession.Session.Get(req, "gangway_id_token"); err != nil {
+				t.Fatalf("Error getting session: %v", err)
+			}
+			if sessionRefreshToken, err = gangwayUserSession.Session.Get(req, "gangway_refresh_token"); err != nil {
+				t.Fatalf("Error getting session: %v", err)
+			}
 
 			// Create state session variable
 			session.Values["state"] = tc.params["state"]
-			session.Values["id_token"] = tc.params["id_token"]
-			session.Values["refresh_token"] = tc.params["refresh_token"]
+			sessionIDToken.Values["id_token"] = tc.params["id_token"]
+			sessionRefreshToken.Values["refresh_token"] = tc.params["refresh_token"]
 			if err = session.Save(req, rsp); err != nil {
+				t.Fatal(err)
+			}
+			if err = sessionIDToken.Save(req, rsp); err != nil {
+				t.Fatal(err)
+			}
+			if err = sessionRefreshToken.Save(req, rsp); err != nil {
 				t.Fatal(err)
 			}
 

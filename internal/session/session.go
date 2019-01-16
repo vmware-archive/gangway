@@ -50,8 +50,8 @@ func generateSessionKeys(sessionSecurityKey string) ([]byte, []byte) {
 }
 
 // Cleanup removes the current session from the store
-func (s *Session) Cleanup(w http.ResponseWriter, r *http.Request) {
-	session, err := s.Session.Get(r, "gangway")
+func (s *Session) Cleanup(w http.ResponseWriter, r *http.Request, name string) {
+	session, err := s.Session.Get(r, name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
