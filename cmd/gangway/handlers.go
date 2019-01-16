@@ -81,7 +81,7 @@ func generateKubeConfig(tmplFile string, data interface{}) {
 	}
 
 	// open file for writing
-	f, err := os.Create(kubeConfigFile)
+	f, _ := os.Create(kubeConfigFile)
 	// create buffered io writer
 	w := bufio.NewWriter(f)
 
@@ -227,7 +227,7 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("Failed to open CA file. %s", err)
 	}
 	defer file.Close()
-	caBytes, err := ioutil.ReadAll(file)
+	caBytes, _ := ioutil.ReadAll(file)
 
 	// load the session cookies
 	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
