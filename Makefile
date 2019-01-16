@@ -32,7 +32,7 @@ setup:
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/mjibson/esc/...
 
-check: test vet gofmt staticcheck unused misspell
+check: test vet gofmt staticcheck misspell
 
 deps:
 	dep ensure -v
@@ -49,10 +49,6 @@ test:
 staticcheck:
 	@go get honnef.co/go/tools/cmd/staticcheck
 	staticcheck ./...
-
-unused:
-	@go get honnef.co/go/tools/cmd/unused
-	unused -exported $(PKGS)
 
 misspell:
 	@go get github.com/client9/misspell/cmd/misspell
