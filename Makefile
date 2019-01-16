@@ -16,7 +16,7 @@ PROJECT := gangway
 # Where to push the docker image.
 REGISTRY ?= gcr.io/heptio-images
 IMAGE := $(REGISTRY)/$(PROJECT)
-SRCDIRS := ./cmd/gangway
+SRCDIRS := ./cmd ./internal
 
 VERSION ?= master
 
@@ -58,7 +58,7 @@ misspell:
 		-error \
 		cmd/* docs/* *.md
 
-gofmt:  
+gofmt:
 	@echo Checking code is gofmted
 	@test -z "$(shell gofmt -s -l -d -e $(SRCDIRS) | tee /dev/stderr)"
 
