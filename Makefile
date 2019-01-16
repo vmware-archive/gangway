@@ -25,7 +25,7 @@ all: build
 build: deps bindata
 	go build ./...
 
-install: 
+install:
 	go install -v ./cmd/gangway/...
 
 setup:
@@ -48,7 +48,7 @@ test:
 
 staticcheck:
 	@go get honnef.co/go/tools/cmd/staticcheck
-	staticcheck $(PKGS)
+	staticcheck ./...
 
 unused:
 	@go get honnef.co/go/tools/cmd/unused
