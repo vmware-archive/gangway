@@ -33,6 +33,15 @@ clusterName: "your_cluster_name"
 # leave as is unless Google instructs you otherwise
 authorizeUrl: "https://accounts.google.com/o/oauth2/auth"
 
+# Access tokens periodically expire. If you need refreshing an access token (offline access),
+# you must specify the query parameter to offline.
+# authorizeURL: "https://accounts.google.com/o/oauth2/auth?access_type=offline"
+
+# When your application receives a refresh token, it is important to store that refresh token for future use.
+# If your application loses the refresh token, it will have to re-prompt the user for consent before obtaining another refresh token.
+# If you need to re-prompt the user for consent, include the approval_prompt parameter in the authorization code request, and set the value to force.
+# authorizeURL: "https://accounts.google.com/o/oauth2/auth?access_type=offline&approval_prompt=force"
+
 # URL to get a token from
 # leave as is unless Google instructs you otherwise
 #
