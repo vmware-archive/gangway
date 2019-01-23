@@ -66,6 +66,7 @@ kubectl config set-credentials {{ .Email }}  \
     --auth-provider-arg=id-token={{ .IDToken }}
 kubectl config set-context {{ .ClusterName }} --cluster={{ .ClusterName }} --user={{ .Email }}
 kubectl config use-context {{ .ClusterName }}
+rm ca-{{ .ClusterName }}.pem
               </code>
             </pre>
         </div>
