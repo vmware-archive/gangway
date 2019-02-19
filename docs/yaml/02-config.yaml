@@ -89,3 +89,7 @@ data:
     # The path gangway uses to create urls (defaults to "")
     # Env var: GANGWAY_HTTP_PATH
     #httpPath: "https://${GANGWAY_HTTP_PATH}"
+
+    # The path to find custom HTML templates
+    # Env var: GANGWAY_CUSTOM_HTTP_TEMPLATES_DIR
+    #customHTMLTemplatesDir: /custom-templates

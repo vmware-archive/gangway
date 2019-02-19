@@ -47,15 +47,16 @@ type Config struct {
 	TrustedCAPath          string   `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
 	HTTPPath               string   `yaml:"httpPath" envconfig:"http_path"`
 
-	SessionSecurityKey string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
+	SessionSecurityKey     string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
+	CustomHTMLTemplatesDir string `yaml:"customHTMLTemplatesDir" envconfig:"custom_http_templates_dir"`
 }
 
 // NewConfig returns a Config struct from serialized config file
 func NewConfig(configFile string) (*Config, error) {
 
 	cfg := &Config{
-		Host: "0.0.0.0",
-		Port: 8080,
+		Host:                   "0.0.0.0",
+		Port:                   8080,
 		AllowEmptyClientSecret: false,
 		Scopes:                 []string{"openid", "profile", "email", "offline_access"},
 		UsernameClaim:          "nickname",

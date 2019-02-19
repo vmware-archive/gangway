@@ -30,3 +30,4 @@ The following table describes the options that can be set via the YAML configura
 | `clusterCAPath` | The path to find the CA bundle for the API server. Used to configure kubectl. This is typically mounted into the default location for workloads running on a Kubernetes cluster and doesn't need to be set. Defaults to `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` |
 | `trustedCAPath` | The path to a root CA to trust for self signed certificates at the Oauth2 URLs |
 | `httpPath` | The path gangway uses to create urls. Defaults to `""`. |
+| `customHTMLTemplatesDir` | The path to a directory that contains custom HTML templates. |
