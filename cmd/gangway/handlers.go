@@ -261,7 +261,11 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 	info := generateInfo(w, r)
-	serveTemplate("commandline.tmpl", info, w)
+	if info == nil {
+		http.Error(w, "Unable to build kubeconfig object", http.StatusInternalServerError)
+	} else {
+		serveTemplate("commandline.tmpl", info, w)
+	}
 }
 
 func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
@@ -360,14 +364,18 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 
 func kubeConfigHandler(w http.ResponseWriter, r *http.Request) {
 	info := generateInfo(w, r)
-	d, err := yaml.Marshal(generateKubeConfig(info))
-	if err != nil {
-		log.Errorf("Error creating kubeconfig - %s", err.Error())
-		http.Error(w, "Error creating kubeconfig", http.StatusInternalServerError)
-	}
+	if info == nil {
+		http.Error(w, "Unable to build kubeconfig object", http.StatusInternalServerError)
+	} else {
+		d, err := yaml.Marshal(generateKubeConfig(info))
+		if err != nil {
+			log.Errorf("Error creating kubeconfig - %s", err.Error())
+			http.Error(w, "Error creating kubeconfig", http.StatusInternalServerError)
+		}
 
-	// tell the browser the returned content should be downloaded
-	w.Header().Add("Content-Disposition", "Attachment")
-	w.Write(d)
+		// tell the browser the returned content should be downloaded
+		w.Header().Add("Content-Disposition", "Attachment")
+		w.Write(d)
+	}
 
 }
