@@ -282,6 +282,7 @@ func kubeConfigHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Errorf("Error creating kubeconfig - %s", err.Error())
 		http.Error(w, "Error creating kubeconfig", http.StatusInternalServerError)
+		return
 	}
 
 	// tell the browser the returned content should be downloaded
