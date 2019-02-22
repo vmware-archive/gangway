@@ -15,7 +15,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
@@ -27,9 +26,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ghodss/yaml"
-
 	"github.com/dgrijalva/jwt-go"
+	"github.com/ghodss/yaml"
 	"github.com/heptiolabs/gangway/internal/oidc"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -37,8 +35,7 @@ import (
 )
 
 const (
-	templatesBase  = "/templates"
-	kubeConfigFile = "gangway.kubeconfig"
+	templatesBase = "/templates"
 )
 
 // userInfo stores information about an authenticated user
@@ -94,7 +91,7 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 	tmpl.ExecuteTemplate(w, tmplFile, data)
 }
 
-func generateKubeConfig(tmplFile string, cfg *userInfo) clientcmdapi.Config {
+func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 	// configure the cluster
 	caData := base64.StdEncoding.EncodeToString([]byte(cfg.ClusterCA))
 
@@ -130,7 +127,7 @@ func generateKubeConfig(tmplFile string, cfg *userInfo) clientcmdapi.Config {
 						Name: "oidc",
 						Config: map[string]string{
 							"client-id":      cfg.ClientID,
-							"client-secret":  cfg.ClientID,
+							"client-secret":  cfg.ClientSecret,
 							"id-token":       cfg.IDToken,
 							"idp-issuer-url": cfg.IssuerURL,
 							"refresh-token":  cfg.RefreshToken,
@@ -140,29 +137,6 @@ func generateKubeConfig(tmplFile string, cfg *userInfo) clientcmdapi.Config {
 			},
 		},
 	}
-
-	//kcfg.Contexts = nil
-	// open file for writing
-	f, err := os.Create(kubeConfigFile)
-	if err != nil {
-		log.Errorf("Error creating kubeconfig file: %s", err)
-	}
-
-	// create buffered io writer
-	w := bufio.NewWriter(f)
-
-	d, err := yaml.Marshal(&kcfg)
-
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-
-	w.Write(d)
-	if err != nil {
-		log.Errorf("Error executing kubeconf template: %s", err)
-	}
-	// flush file data to disk
-	w.Flush()
 	return kcfg
 }
 
@@ -286,7 +260,11 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func commandlineHandler(w http.ResponseWriter, r *http.Request) {
+	info := generateInfo(w, r)
+	serveTemplate("commandline.tmpl", info, w)
+}
 
+func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	// read in public ca.crt to output in commandline copy/paste commands
 	file, err := os.Open(cfg.ClusterCAPath)
 	if err != nil {
@@ -304,12 +282,12 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+		return nil
 	}
 	sessionRefreshToken, err := gangwayUserSession.Session.Get(r, "gangway_refresh_token")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+		return nil
 	}
 
 	idToken, ok := sessionIDToken.Values["id_token"].(string)
@@ -319,7 +297,7 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
 
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
+		return nil
 	}
 
 	refreshToken, ok := sessionRefreshToken.Values["refresh_token"].(string)
@@ -329,20 +307,20 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
 
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
+		return nil
 	}
 
 	jwtToken, err := oidc.ParseToken(idToken, cfg.ClientSecret)
 	if err != nil {
 		http.Error(w, "Could not parse JWT", http.StatusInternalServerError)
-		return
+		return nil
 	}
 
 	claims := jwtToken.Claims.(jwt.MapClaims)
 	username, ok := claims[cfg.UsernameClaim].(string)
 	if !ok {
 		http.Error(w, "Could not parse Username claim", http.StatusInternalServerError)
-		return
+		return nil
 	}
 	email := strings.Join([]string{username, cfg.ClusterName}, "@")
 	if cfg.EmailClaim != "" {
@@ -350,14 +328,14 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			http.Error(w, "Could not parse Email claim", http.StatusInternalServerError)
 			log.Warn("using the Email Claim config setting is deprecated. In future Gangway will use `UsernameClaim@ClusterName`")
-			return
+			return nil
 		}
 	}
 
 	issuerURL, ok := claims["iss"].(string)
 	if !ok {
 		http.Error(w, "Could not parse Issuer URL claim", http.StatusInternalServerError)
-		return
+		return nil
 	}
 
 	if cfg.ClientSecret == "" {
@@ -377,13 +355,19 @@ func commandlineHandler(w http.ResponseWriter, r *http.Request) {
 		ClusterCA:    string(caBytes),
 		HTTPPath:     cfg.HTTPPath,
 	}
-
-	generateKubeConfig("kubeconfig.tmpl", info)
-	serveTemplate("commandline.tmpl", info, w)
+	return info
 }
 
 func kubeConfigHandler(w http.ResponseWriter, r *http.Request) {
+	info := generateInfo(w, r)
+	d, err := yaml.Marshal(generateKubeConfig(info))
+	if err != nil {
+		log.Errorf("Error creating kubeconfig - %s", err.Error())
+		http.Error(w, "Error creating kubeconfig", http.StatusInternalServerError)
+	}
+
 	// tell the browser the returned content should be downloaded
 	w.Header().Add("Content-Disposition", "Attachment")
-	http.ServeFile(w, r, kubeConfigFile)
+	w.Write(d)
+
 }
