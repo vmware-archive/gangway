@@ -39,7 +39,9 @@ instructions on how to configure `kubectl` to use the ID token.
 
 The following sequence diagram details the authentication flow:
 
-![gangway-sequence-diagram](./docs/images/gangway-sequence-diagram.png)
+<p align="center">
+    <img src="docs/images/gangway-sequence-diagram.png" width="600px" />
+</p>
 
 ## API-Server flags
 
