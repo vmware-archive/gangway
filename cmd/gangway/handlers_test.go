@@ -17,6 +17,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -312,8 +313,17 @@ func TestKubeconfigHandler(t *testing.T) {
 			var sessionRefreshToken *sessions.Session
 			var err error
 
+			// Create dummy cluster CA file
+			clusterCAData := "dummy cluster CA"
+			f, err := ioutil.TempFile("", "gangway-kubeconfig-handler-test")
+			if err != nil {
+				t.Fatalf("Error creating temp file: %v", err)
+			}
+			fmt.Fprint(f, clusterCAData)
+
 			// Set config global var
 			cfg = &tc.cfg
+			cfg.ClusterCAPath = f.Name()
 
 			// Init variables
 			rsp = NewRecorder()
@@ -383,6 +393,9 @@ func TestKubeconfigHandler(t *testing.T) {
 				}
 				if cluster.Cluster.Server != cfg.APIServerURL {
 					t.Errorf("Expected cluster server to be %q, but found %q", cfg.APIServerURL, cluster.Cluster.Server)
+				}
+				if string(cluster.Cluster.CertificateAuthorityData) != clusterCAData {
+					t.Errorf("Expected cluster CA Data %q, but got %q", clusterCAData, string(cluster.Cluster.CertificateAuthorityData))
 				}
 
 				// Validate AuthInfo
