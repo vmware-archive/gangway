@@ -1,4 +1,4 @@
-FROM golang:1.9
+FROM golang:1.12
 WORKDIR /go/src/github.com/heptiolabs/gangway
 
 RUN go get github.com/golang/dep/cmd/dep
