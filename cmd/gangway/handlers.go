@@ -119,7 +119,6 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 			{
 				Name: cfg.Email,
 				AuthInfo: clientcmdapi.AuthInfo{
-					Username: cfg.Email,
 					AuthProvider: &clientcmdapi.AuthProviderConfig{
 						Name: "oidc",
 						Config: map[string]string{
