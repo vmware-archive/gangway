@@ -111,7 +111,7 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 		},
 		Contexts: []clientcmdapi.NamedContext{
 			{
-				Name: cfg.Email,
+				Name: cfg.ClusterName,
 				Context: clientcmdapi.Context{
 					Cluster:  cfg.ClusterName,
 					AuthInfo: cfg.Email,
