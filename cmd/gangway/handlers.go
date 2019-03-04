@@ -104,7 +104,7 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 			{
 				Name: cfg.ClusterName,
 				Cluster: clientcmdapi.Cluster{
-					Server: cfg.APIServerURL,
+					Server:                   cfg.APIServerURL,
 					CertificateAuthorityData: []byte(caData),
 				},
 			},
