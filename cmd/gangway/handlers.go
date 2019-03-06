@@ -83,7 +83,7 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 		return
 	}
 
-	tmpl := htmltemplate.New(tmplFile)
+	tmpl := htmltemplate.New(tmplFile).Funcs(FuncMap())
 	tmpl, err = tmpl.Parse(string(templateData))
 	if err != nil {
 		log.Errorf("Failed to parse template: %v", err)
@@ -123,11 +123,12 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 					AuthProvider: &clientcmdapi.AuthProviderConfig{
 						Name: "oidc",
 						Config: map[string]string{
-							"client-id":      cfg.ClientID,
-							"client-secret":  cfg.ClientSecret,
-							"id-token":       cfg.IDToken,
-							"idp-issuer-url": cfg.IssuerURL,
-							"refresh-token":  cfg.RefreshToken,
+							"client-id":                      cfg.ClientID,
+							"client-secret":                  cfg.ClientSecret,
+							"id-token":                       cfg.IDToken,
+							"idp-issuer-url":                 cfg.IssuerURL,
+							"idp-certificate-authority-data": caData,
+							"refresh-token":                  cfg.RefreshToken,
 						},
 					},
 				},
