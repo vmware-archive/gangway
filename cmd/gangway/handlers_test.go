@@ -17,17 +17,22 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/ghodss/yaml"
 
 	"github.com/gorilla/sessions"
 	"github.com/heptiolabs/gangway/internal/config"
 	"github.com/heptiolabs/gangway/internal/session"
 	"golang.org/x/oauth2"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 func testInit() {
@@ -259,6 +264,172 @@ func TestCommandLineHandler(t *testing.T) {
 				found := re.FindString(bodyString)
 				if !strings.Contains(found, tc.expectedUsernameInTemplate) {
 					t.Errorf("template should contain --user=%s but found %s", tc.expectedUsernameInTemplate, found)
+				}
+			}
+		})
+	}
+}
+
+func TestKubeconfigHandler(t *testing.T) {
+	tests := map[string]struct {
+		cfg                                config.Config
+		params                             map[string]string
+		usernameClaim                      string
+		expectedStatusCode                 int
+		expectedAuthInfoName               string
+		expectedAuthInfoAuthProviderConfig map[string]string
+	}{
+		"default": {
+			cfg: config.Config{
+				UsernameClaim: "sub",
+				ClusterName:   "cluster1",
+				APIServerURL:  "https://kubernetes",
+				ClientID:      "someClientID",
+				ClientSecret:  "someClientSecret",
+			},
+			params: map[string]string{
+				"id_token":      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
+				"refresh_token": "bar",
+			},
+			expectedStatusCode:   http.StatusOK,
+			usernameClaim:        "sub",
+			expectedAuthInfoName: "gangway@heptio.com@cluster1",
+			expectedAuthInfoAuthProviderConfig: map[string]string{
+				"client-id":      "someClientID",
+				"client-secret":  "someClientSecret",
+				"id-token":       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.zNG4Dnxr76J0p4phfsAUYWunioct0krkMiunMynlQsU",
+				"refresh-token":  "bar",
+				"idp-issuer-url": "GangwayTest",
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var req *http.Request
+			var rsp *httptest.ResponseRecorder
+			var session *sessions.Session
+			var sessionIDToken *sessions.Session
+			var sessionRefreshToken *sessions.Session
+			var err error
+
+			// Create dummy cluster CA file
+			clusterCAData := "dummy cluster CA"
+			f, err := ioutil.TempFile("", "gangway-kubeconfig-handler-test")
+			if err != nil {
+				t.Fatalf("Error creating temp file: %v", err)
+			}
+			fmt.Fprint(f, clusterCAData)
+
+			// Set config global var
+			cfg = &tc.cfg
+			cfg.ClusterCAPath = f.Name()
+
+			// Init variables
+			rsp = NewRecorder()
+			testInit()
+			req, err = http.NewRequest("GET", "/kubeconf", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Create request
+			if session, err = gangwayUserSession.Session.Get(req, "gangway"); err != nil {
+				t.Fatalf("Error getting session: %v", err)
+			}
+			if sessionIDToken, err = gangwayUserSession.Session.Get(req, "gangway_id_token"); err != nil {
+				t.Fatalf("Error getting session: %v", err)
+			}
+			if sessionRefreshToken, err = gangwayUserSession.Session.Get(req, "gangway_refresh_token"); err != nil {
+				t.Fatalf("Error getting session: %v", err)
+			}
+
+			sessionIDToken.Values["id_token"] = tc.params["id_token"]
+			sessionRefreshToken.Values["refresh_token"] = tc.params["refresh_token"]
+			if err = session.Save(req, rsp); err != nil {
+				t.Fatal(err)
+			}
+			if err = sessionIDToken.Save(req, rsp); err != nil {
+				t.Fatal(err)
+			}
+			if err = sessionRefreshToken.Save(req, rsp); err != nil {
+				t.Fatal(err)
+			}
+
+			// Add query params to request
+			q := req.URL.Query()
+			for k, v := range tc.params {
+				q.Add(k, v)
+			}
+			req.URL.RawQuery = q.Encode()
+
+			handler := http.HandlerFunc(kubeConfigHandler)
+
+			// Call Handler
+			handler.ServeHTTP(rsp, req)
+
+			// Validate
+			if status := rsp.Code; status != tc.expectedStatusCode {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, tc.expectedStatusCode)
+			}
+			// if response code is OK, validate the kubeconfig
+			if rsp.Code == 200 {
+				bodyBytes, err := ioutil.ReadAll(rsp.Body)
+				if err != nil {
+					t.Fatalf("error reading body: %v", err)
+				}
+				kubeconfig := &clientcmdapi.Config{}
+				if err := yaml.Unmarshal(bodyBytes, kubeconfig); err != nil {
+					t.Fatalf("error unmarshaling response: %v", err)
+				}
+
+				// Validate cluster
+				if len(kubeconfig.Clusters) != 1 {
+					t.Fatalf("Found %d clusters in the generated kubeconfig, expected 1", len(kubeconfig.Clusters))
+				}
+				cluster := kubeconfig.Clusters[0]
+				if cluster.Name != cfg.ClusterName {
+					t.Errorf("Expected cluster name to be %q, but found %q", cfg.ClusterName, kubeconfig.Clusters[0].Name)
+				}
+				if cluster.Cluster.Server != cfg.APIServerURL {
+					t.Errorf("Expected cluster server to be %q, but found %q", cfg.APIServerURL, cluster.Cluster.Server)
+				}
+				if string(cluster.Cluster.CertificateAuthorityData) != clusterCAData {
+					t.Errorf("Expected cluster CA Data %q, but got %q", clusterCAData, string(cluster.Cluster.CertificateAuthorityData))
+				}
+
+				// Validate AuthInfo
+				if len(kubeconfig.AuthInfos) != 1 {
+					t.Fatalf("Found %d users in the generated kubeconfig, expected 1", len(kubeconfig.AuthInfos))
+				}
+				authInfo := kubeconfig.AuthInfos[0]
+				if authInfo.Name != tc.expectedAuthInfoName {
+					t.Errorf("Expected AuthInfo.Name %q, but got %q", tc.expectedAuthInfoName, authInfo.Name)
+				}
+
+				if authInfo.AuthInfo.AuthProvider.Name != "oidc" {
+					t.Errorf("expecetd authprovider to be oidc, got %s", authInfo.AuthInfo.AuthProvider.Name)
+				}
+				if !reflect.DeepEqual(authInfo.AuthInfo.AuthProvider.Config, tc.expectedAuthInfoAuthProviderConfig) {
+					t.Errorf("Expected %v, got %v", tc.expectedAuthInfoAuthProviderConfig, authInfo.AuthInfo.AuthProvider.Config)
+				}
+
+				// Validate context
+				if len(kubeconfig.Contexts) != 1 {
+					t.Fatalf("Found %d contexts in the generated kubeconfig, expected 1", len(kubeconfig.Contexts))
+				}
+				context := kubeconfig.Contexts[0]
+				if context.Name != cfg.ClusterName {
+					t.Errorf("Expected context name to be %q, but found %q", cfg.ClusterName, context.Name)
+				}
+				if context.Context.Cluster != cluster.Name {
+					t.Errorf("Cluster name %q in context does not match cluster name %q", context.Context.Cluster, cluster.Name)
+				}
+				if context.Context.AuthInfo != authInfo.Name {
+					t.Errorf("AuthInfo name %q in context does not match user name %q", context.Context.AuthInfo, authInfo.Name)
+				}
+				if kubeconfig.CurrentContext != context.Name {
+					t.Errorf("Current context %q does not match context name %q", kubeconfig.CurrentContext, context.Name)
 				}
 			}
 		})

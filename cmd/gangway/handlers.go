@@ -92,9 +92,6 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 }
 
 func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
-	// configure the cluster
-	caData := base64.StdEncoding.EncodeToString([]byte(cfg.ClusterCA))
-
 	// fill out kubeconfig structure
 	kcfg := clientcmdapi.Config{
 		Kind:           "Config",
@@ -105,13 +102,13 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 				Name: cfg.ClusterName,
 				Cluster: clientcmdapi.Cluster{
 					Server:                   cfg.APIServerURL,
-					CertificateAuthorityData: []byte(caData),
+					CertificateAuthorityData: []byte(cfg.ClusterCA),
 				},
 			},
 		},
 		Contexts: []clientcmdapi.NamedContext{
 			{
-				Name: cfg.Email,
+				Name: cfg.ClusterName,
 				Context: clientcmdapi.Context{
 					Cluster:  cfg.ClusterName,
 					AuthInfo: cfg.Email,
@@ -122,7 +119,6 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 			{
 				Name: cfg.Email,
 				AuthInfo: clientcmdapi.AuthInfo{
-					Username: cfg.Email,
 					AuthProvider: &clientcmdapi.AuthProviderConfig{
 						Name: "oidc",
 						Config: map[string]string{
