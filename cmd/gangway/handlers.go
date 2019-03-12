@@ -127,7 +127,7 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 							"client-secret":                  cfg.ClientSecret,
 							"id-token":                       cfg.IDToken,
 							"idp-issuer-url":                 cfg.IssuerURL,
-							"idp-certificate-authority-data": caData,
+							"idp-certificate-authority-data": base64.StdEncoding.EncodeToString([]byte(cfg.TrustedCA)),
 							"refresh-token":                  cfg.RefreshToken,
 						},
 					},
