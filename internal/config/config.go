@@ -39,6 +39,7 @@ type Config struct {
 	Scopes                 []string `yaml:"scopes" envconfig:"scopes"`
 	UsernameClaim          string   `yaml:"usernameClaim" envconfig:"username_claim"`
 	EmailClaim             string   `yaml:"emailClaim" envconfig:"email_claim"`
+	NamespaceClaim         string   `yaml:"namespaceClaim" envconfig:"namespace_claim"`
 	ServeTLS               bool     `yaml:"serveTLS" envconfig:"serve_tls"`
 	CertFile               string   `yaml:"certFile" envconfig:"cert_file"`
 	KeyFile                string   `yaml:"keyFile" envconfig:"key_file"`
@@ -55,12 +56,13 @@ type Config struct {
 func NewConfig(configFile string) (*Config, error) {
 
 	cfg := &Config{
-		Host:                   "0.0.0.0",
-		Port:                   8080,
+		Host: "0.0.0.0",
+		Port: 8080,
 		AllowEmptyClientSecret: false,
 		Scopes:                 []string{"openid", "profile", "email", "offline_access"},
 		UsernameClaim:          "nickname",
 		EmailClaim:             "email",
+		NamespaceClaim:         "",
 		ServeTLS:               false,
 		CertFile:               "/etc/gangway/tls/tls.crt",
 		KeyFile:                "/etc/gangway/tls/tls.key",

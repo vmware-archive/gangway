@@ -42,6 +42,7 @@ const (
 type userInfo struct {
 	ClusterName  string
 	Username     string
+	Namespace    string
 	Email        string
 	IDToken      string
 	RefreshToken string
@@ -110,8 +111,9 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 			{
 				Name: cfg.ClusterName,
 				Context: clientcmdapi.Context{
-					Cluster:  cfg.ClusterName,
-					AuthInfo: cfg.Email,
+					Cluster:   cfg.ClusterName,
+					AuthInfo:  cfg.Email,
+					Namespace: cfg.Namespace,
 				},
 			},
 		},
@@ -344,6 +346,15 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		http.Error(w, "Could not parse Username claim", http.StatusInternalServerError)
 		return nil
 	}
+	namespace := ""
+	if cfg.NamespaceClaim != "" {
+		namespace, ok = claims[cfg.NamespaceClaim].(string)
+		if !ok {
+			http.Error(w, "Could not parse Namespace claim", http.StatusInternalServerError)
+			return nil
+		}
+	}
+
 	email := strings.Join([]string{username, cfg.ClusterName}, "@")
 	if cfg.EmailClaim != "" {
 		email, ok = claims[cfg.EmailClaim].(string)
@@ -363,10 +374,10 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	if cfg.ClientSecret == "" {
 		log.Warn("Setting an empty Client Secret should only be done if you have no other option and is an inherent security risk.")
 	}
-
 	info := &userInfo{
 		ClusterName:  cfg.ClusterName,
 		Username:     username,
+		Namespace:    namespace,
 		Email:        email,
 		IDToken:      idToken,
 		RefreshToken: refreshToken,
