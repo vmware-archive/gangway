@@ -15,4 +15,5 @@ RUN CGO_ENABLED=0 GOOS=linux go install -ldflags="-w -s" -v github.com/heptiolab
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
+USER 1001:1001
 COPY --from=0 /go/bin/gangway /bin/gangway
