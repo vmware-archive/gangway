@@ -42,7 +42,7 @@ const (
 type userInfo struct {
 	ClusterName  string
 	Username     string
-	Email        string
+	KubeCfgUser  string
 	IDToken      string
 	RefreshToken string
 	ClientID     string
@@ -111,13 +111,13 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 				Name: cfg.ClusterName,
 				Context: clientcmdapi.Context{
 					Cluster:  cfg.ClusterName,
-					AuthInfo: cfg.Email,
+					AuthInfo: cfg.KubeCfgUser,
 				},
 			},
 		},
 		AuthInfos: []clientcmdapi.NamedAuthInfo{
 			{
-				Name: cfg.Email,
+				Name: cfg.KubeCfgUser,
 				AuthInfo: clientcmdapi.AuthInfo{
 					AuthProvider: &clientcmdapi.AuthProviderConfig{
 						Name: "oidc",
@@ -344,14 +344,11 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		http.Error(w, "Could not parse Username claim", http.StatusInternalServerError)
 		return nil
 	}
-	email := strings.Join([]string{username, cfg.ClusterName}, "@")
+
+	kubeCfgUser := strings.Join([]string{username, cfg.ClusterName}, "@")
+
 	if cfg.EmailClaim != "" {
-		email, ok = claims[cfg.EmailClaim].(string)
-		if !ok {
-			http.Error(w, "Could not parse Email claim", http.StatusInternalServerError)
-			log.Warn("using the Email Claim config setting is deprecated. In future Gangway will use `UsernameClaim@ClusterName`")
-			return nil
-		}
+		log.Warn("using the Email Claim config setting is deprecated. Gangway uses `UsernameClaim@ClusterName`. This field will be removed in a future version.")
 	}
 
 	issuerURL, ok := claims["iss"].(string)
@@ -367,7 +364,7 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	info := &userInfo{
 		ClusterName:  cfg.ClusterName,
 		Username:     username,
-		Email:        email,
+		KubeCfgUser:  kubeCfgUser,
 		IDToken:      idToken,
 		RefreshToken: refreshToken,
 		ClientID:     cfg.ClientID,
