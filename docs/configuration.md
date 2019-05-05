@@ -25,6 +25,7 @@ The following table describes the options that can be set via the YAML configura
 | `clientSecret` | API client secret as indicated by the identity provider |
 | `allowEmptyClientSecret` | Some identity providers accept an empty client secret, this is not generally considered a good idea. If you have to use an empty secret and accept the risks that come with that then you can set this to true. Defaults to `false`. |
 | `usernameClaim` | The JWT claim to use as the username. This is used in UI. This is combined with the clusterName for the "user" portion of the kubeconfig. Defaults to `nickname`. |
+| `namespaceClaim` | The JWT claim to use as the namespace. This is used to set a namespace in the kubeconfig context. Leave unset for default namespace. |
 | `emailClaim` | Deprecated. Defaults to `email`. |
 | `apiServerURL` | The API server endpoint used to configure kubectl |
 | `clusterCAPath` | The path to find the CA bundle for the API server. Used to configure kubectl. This is typically mounted into the default location for workloads running on a Kubernetes cluster and doesn't need to be set. Defaults to `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` |
