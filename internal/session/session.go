@@ -16,23 +16,21 @@ package session
 
 import (
 	"crypto/sha256"
-	"net/http"
-
-	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/pbkdf2"
+	"net/http"
 )
 
 const salt = "MkmfuPNHnZBBivy0L0aW"
 
 // Session defines a Gangway session
 type Session struct {
-	Session *sessions.CookieStore
+	Session *CustomCookieStore
 }
 
 // New inits a Session with CookieStore
 func New(sessionSecurityKey string) *Session {
 	return &Session{
-		Session: sessions.NewCookieStore(generateSessionKeys(sessionSecurityKey)),
+		Session: NewCustomCookieStore(generateSessionKeys(sessionSecurityKey)),
 	}
 }
 
