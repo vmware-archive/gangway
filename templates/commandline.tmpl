@@ -1,61 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
-  <title>Gangway</title>
-
-  <!-- CSS  -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
-
-  <!-- Prism -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/prism.min.js" integrity="sha256-jTGzLAqOAcOL+ALD2f2tvFY7fs6dwkOeo88xiuVHaRk=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/components/prism-bash.min.js" integrity="sha256-Ch5rv5tgAdVMCh7Wqb0UOcXkQAHNFSezi+0v/0z6xfw=" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/themes/prism-tomorrow.min.css" integrity="sha256-4S9ufRr1EqaUFFeM9/52GH68Hs1Sbvx8eFXBWpl8zPI=" crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/plugins/toolbar/prism-toolbar.min.css" integrity="sha256-xY7/SUa769r0PZ1ytZPFj2WqnOZYaYSKbX1hVTiQlcA=" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha256-OvKYJLcYRP3ZIPilT03rynyZfkdGFwzCwU82NB4/AT4=" crossorigin="anonymous"></script>  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js" integrity="sha256-s+Z1sBUQFaaw7xeAnWb/oS8gBM4MEKiEWMRJ0p+/xbc=" crossorigin="anonymous"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Gangway</title>
+    <base href="{{ .HTTPPath }}/">
+    <link type="text/css" rel="stylesheet" href="assets/materialize.min.css"  media="screen"/>
+    <link type="text/css" rel="stylesheet" href="assets/prism.css" media="screen"/>
+    <link type="text/css" rel="stylesheet" href="assets/gangway.css" media="screen"/>
 </head>
-    <body>
-        <nav class="light-blue blue" role="navigation">
-            <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">gangway</a>
-            <ul class="right hide-on-med-and-down">
+
+<body>
+    <nav class="light-blue blue">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">gangway</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a href="/logout">Logout</a></li>
             </ul>
+        </div>
+    </nav>
+    
 
-            <ul id="nav-mobile" class="side-nav">
-                <li><a href="#">Decode JWT</a></li>
-            </ul>
-            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+    <div class="container">
+        <h4 class="center">Welcome {{ .Username }}.</h4>
+        <p class="flow-text">In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authentication for your client.</p>
+        <p>
+            <a href="{{ .HTTPPath }}/kubeconf" class="waves-effect waves-light btn-large blue">Download Kubeconfig</a>
+        </p>
+    </div>
+
+
+    <div class="container">
+        <h5>Config cluster context</h5>
+        <p>Once kubectl is installed (see below), you may execute the following:</p>
+        <div class="card">
+            <div class="card-tabs">
+                <ul class="tabs">
+                    <li class="tab"><a class="active" href="#config-section-bash">Bash</a></li>
+                    <li class="tab"><a href="#config-section-ps">PowerShell</a></li>
+                </ul>
             </div>
-        </nav>
-        <div class="container">
-            <h4 class="header center darken-3">
-                Welcome {{ .Username }}.
-            </h4>
-            <h5>
-                In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authentication for your client.
-            </h5>
-            <br>
-            <p>
-                The Kubernetes command-line utility, kubectl, may be installed like so:
-            </p>
-           <pre>
-             <code class="language-bash">
-$ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/$(uname | awk '{print tolower($0)}')/amd64/kubectl
-$ chmod +x ./kubectl
-$ sudo mv ./kubectl /usr/local/bin/kubectl
-             </code>
-           </pre>
-            <div class="row">
-                <div class="col s12 right-align"><a href="{{ .HTTPPath }}/kubeconf" class="btn-large waves-effect waves-light blue">Download Kubeconfig</a></div>
-                <div class="col s12">Once kubectl is installed, you may execute the following:</div>
-            </div>
-            <pre>
-               <code class="language-bash">
-echo "{{ .ClusterCA }}" \ > ca-{{ .ClusterName }}.pem
+
+            <div class="card-content grey lighten-4">
+                <div class="right-align">
+                    <a class="waves-effect waves-light btn-small btn-copy blue">Copy to clipboard</a>
+                </div>
+            
+                <pre id="config-section-bash"><code class="language-bash">echo "{{ .ClusterCA }}" \ > ca-{{ .ClusterName }}.pem
 kubectl config set-cluster {{ .ClusterName }} --server={{ .APIServerURL }} --certificate-authority=ca-{{ .ClusterName }}.pem --embed-certs
 kubectl config set-credentials {{ .KubeCfgUser }}  \
     --auth-provider=oidc  \
@@ -66,9 +57,56 @@ kubectl config set-credentials {{ .KubeCfgUser }}  \
     --auth-provider-arg='id-token={{ .IDToken }}'
 kubectl config set-context {{ .ClusterName }} --cluster={{ .ClusterName }} --user={{ .KubeCfgUser }}
 kubectl config use-context {{ .ClusterName }}
-rm ca-{{ .ClusterName }}.pem
-              </code>
-            </pre>
+rm ca-{{ .ClusterName }}.pem</code></pre>
+                <pre id="config-section-ps"><code class="language-powershell">$ClusterCA = "{{ .ClusterCA }}"
+Set-Content -Path ca-{{ .ClusterName }}.pem -Value $ClusterCA
+kubectl config set-cluster {{ .ClusterName }} --server={{ .APIServerURL }} --certificate-authority=ca-{{ .ClusterName }}.pem --embed-certs
+kubectl config set-credentials {{ .KubeCfgUser }}  `
+    --auth-provider=oidc  `
+    --auth-provider-arg='idp-issuer-url={{ .IssuerURL }}'  `
+    --auth-provider-arg='client-id={{ .ClientID }}'  `
+    --auth-provider-arg='client-secret={{ .ClientSecret }}' `
+    --auth-provider-arg='refresh-token={{ .RefreshToken }}' `
+    --auth-provider-arg='id-token={{ .IDToken }}'
+kubectl config set-context {{ .ClusterName }} --cluster={{ .ClusterName }} --user={{ .KubeCfgUser }}
+kubectl config use-context {{ .ClusterName }}
+Remove-Item ca-{{ .ClusterName }}.pem</code></pre>
+            </div>
         </div>
-    </body>
+    </div>
+
+
+    <div class="container">
+        <h5>Install kubectl</h5>
+        <p>The Kubernetes command-line utility, kubectl, may be installed like so:</p>
+        <div class="card">
+            <div class="card-tabs">
+                <ul class="tabs">
+                    <li class="tab"><a class="active" href="#install-section-bash">Bash</a></li>
+                    <li class="tab"><a href="#install-section-ps">PowerShell</a></li>
+                </ul>
+            </div>
+
+            <div class="card-content grey lighten-4">
+                <div class="right-align">
+                    <a class="waves-effect waves-light btn-small btn-copy blue">Copy to clipboard</a>
+                </div>
+            
+                <pre id="install-section-bash"><code class="language-bash">curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/$(uname | awk '{print tolower($0)}')/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl</code></pre>
+                <pre id="install-section-ps"><code class="language-powershell">Install-Script -Name install-kubectl -Scope CurrentUser -Force
+New-Item -Path 'C:\Program Files\Kubectl' -ItemType Directory
+install-kubectl.ps1 -DownloadLocation 'C:\Program Files\Kubectl'</code></pre>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript" src="assets/materialize.min.js"></script>
+    <script type="text/javascript" src="assets/prism.js"></script>
+    <script type="text/javascript" src="assets/prism-bash.js"></script>
+    <script type="text/javascript" src="assets/prism-powershell.js"></script>
+    <script type="text/javascript" src="assets/gangway.js"></script>
+</body>
 </html>
