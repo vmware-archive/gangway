@@ -9,7 +9,14 @@ RUN go get -u github.com/mjibson/esc/...
 COPY cmd cmd
 COPY templates templates
 COPY internal internal
-RUN esc -o cmd/gangway/bindata.go templates/
+COPY assets assets
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-bash.js assets/
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/prism.js assets/
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/themes/prism.css assets/
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-powershell.js assets/
+ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/css/materialize.min.css assets/
+ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/js/materialize.min.js assets/
+RUN esc -o cmd/gangway/bindata.go templates/ assets/
 
 RUN CGO_ENABLED=0 GOOS=linux go install -ldflags="-w -s" -v github.com/heptiolabs/gangway/...
 

@@ -87,8 +87,7 @@ func main() {
 	http.Handle(fmt.Sprintf("%s/kubeconf", cfg.HTTPPath), loginRequiredHandlers.ThenFunc(kubeConfigHandler))
 
 	// Static assets
-	assetUrl := fmt.Sprintf("%s/assets/", cfg.HTTPPath)
-	http.Handle(assetUrl, http.StripPrefix(assetUrl, http.FileServer(http.Dir("assets"))))
+	http.Handle("/assets/", http.FileServer(FS(false)))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	// create http server with timeouts
