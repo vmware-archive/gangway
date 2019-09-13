@@ -88,7 +88,7 @@ func main() {
 
 	// Static assets
 	assetUrl := fmt.Sprintf("%s/assets/", cfg.HTTPPath)
-	http.Handle(assetUrl, http.StripPrefix(assetUrl, http.FileServer(http.Dir("/assets"))))
+	http.Handle(assetUrl, http.StripPrefix(assetUrl, http.FileServer(http.Dir("assets"))))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	// create http server with timeouts

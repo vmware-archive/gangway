@@ -15,13 +15,5 @@ RUN CGO_ENABLED=0 GOOS=linux go install -ldflags="-w -s" -v github.com/heptiolab
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
-COPY assets assets
-ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-bash.js assets/
-ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/prism.js assets/
-ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/themes/prism.css assets/
-ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-powershell.js assets/
-ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/css/materialize.min.css assets/
-ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/js/materialize.min.js assets/
-RUN chmod 644 /assets/*
 USER 1001:1001
 COPY --from=0 /go/bin/gangway /bin/gangway
