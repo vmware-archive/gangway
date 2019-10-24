@@ -193,6 +193,7 @@
   input-imports = [
     "github.com/dgrijalva/jwt-go",
     "github.com/ghodss/yaml",
+    "github.com/gorilla/securecookie",
     "github.com/gorilla/sessions",
     "github.com/justinas/alice",
     "github.com/kelseyhightower/envconfig",
