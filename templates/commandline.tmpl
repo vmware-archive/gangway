@@ -12,11 +12,17 @@
   <!-- Prism -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/prism.min.js" integrity="sha256-jTGzLAqOAcOL+ALD2f2tvFY7fs6dwkOeo88xiuVHaRk=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/components/prism-bash.min.js" integrity="sha256-Ch5rv5tgAdVMCh7Wqb0UOcXkQAHNFSezi+0v/0z6xfw=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/components/prism-yaml.min.js" integrity="sha256-pxsoS7PqPuy6D5T0Dq2PEXKJ5SRlIkdG8hpoMxQ0YlM=" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/themes/prism-tomorrow.min.css" integrity="sha256-4S9ufRr1EqaUFFeM9/52GH68Hs1Sbvx8eFXBWpl8zPI=" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/plugins/toolbar/prism-toolbar.min.css" integrity="sha256-xY7/SUa769r0PZ1ytZPFj2WqnOZYaYSKbX1hVTiQlcA=" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha256-OvKYJLcYRP3ZIPilT03rynyZfkdGFwzCwU82NB4/AT4=" crossorigin="anonymous"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha256-OvKYJLcYRP3ZIPilT03rynyZfkdGFwzCwU82NB4/AT4=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.14.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js" integrity="sha256-s+Z1sBUQFaaw7xeAnWb/oS8gBM4MEKiEWMRJ0p+/xbc=" crossorigin="anonymous"></script>
+  <style>
+      .code-toolbar {
+          margin-bottom: 2em;
+      }
+  </style>
 </head>
     <body>
         <nav class="light-blue blue" role="navigation">
@@ -35,6 +41,33 @@
             <h4 class="header center darken-3">
                 Welcome {{ .Username }}.
             </h4>
+            <h5>
+                Claims received from the upstream issuer:
+            </h5>
+            <pre><code class="language-yaml">
+{{- range $key, $value := .Claims -}}
+    {{- if eq $key "groups" -}}
+        {{- printf "%s:\n" $key -}}
+        {{- range $groupName := $value -}}
+            {{- printf "- \"%s\"\n" $groupName -}}
+        {{- end -}}
+    {{- else -}}
+        {{- if eq (printf "%T" $value) "string" -}}
+            {{- printf "%s: \"%s\"\n" $key $value -}}
+        {{- else if eq (printf "%T" $value) "bool" -}}
+            {{- if eq $value true -}}
+                {{- printf "%s: true\n" $key -}}
+            {{- else -}}
+                {{- printf "%s: false\n" $key -}}
+            {{ end }}
+        {{- else if or (eq (printf "%T" $value) "float64") (eq (printf "%T" $value) "float32") -}}
+            {{- printf "%s: %f\n" $key $value -}}
+        {{- else -}}
+            {{- printf "%s: %d\n" $key $value -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+            </code></pre>
             <h5>
                 In order to get command-line access to the {{ .ClusterName }} Kubernetes cluster, you will need to configure OpenID Connect (OIDC) authentication for your client.
             </h5>
