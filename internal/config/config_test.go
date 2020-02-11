@@ -38,6 +38,7 @@ func TestEnvionmentOverrides(t *testing.T) {
 	os.Setenv("GANGWAY_TOKEN_URL", "https://foo.bar/token")
 	os.Setenv("GANGWAY_AUDIENCE", "foo")
 	os.Setenv("GANGWAY_SCOPES", "groups,sub")
+	os.Setenv("GANGWAY_IDP_CA_PATH", "/cacerts/idp-ca.cert")
 	cfg, err := NewConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)
@@ -53,6 +54,9 @@ func TestEnvionmentOverrides(t *testing.T) {
 
 	if cfg.Scopes[0] != "groups" || cfg.Scopes[1] != "sub" {
 		t.Errorf("Failed to set scopes via environment variable. Expected %s but got %s", "[groups, sub]", cfg.Scopes)
+	}
+	if cfg.IdentityProviderCAPath != "/cacerts/idp-ca.cert" {
+		t.Errorf("Failed to set idp ca via environment variable. Expected \"/cacerts/idp-ca.cert\" but got %s", cfg.IdentityProviderCAPath)
 	}
 }
 

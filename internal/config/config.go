@@ -45,6 +45,7 @@ type Config struct {
 	APIServerURL           string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
 	ClusterCAPath          string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
 	TrustedCAPath          string   `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
+	IdentityProviderCAPath string   `yaml:"idpCAPath" envconfig:"idp_ca_path"`
 	HTTPPath               string   `yaml:"httpPath" envconfig:"http_path"`
 
 	SessionSecurityKey     string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`

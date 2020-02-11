@@ -40,17 +40,18 @@ const (
 
 // userInfo stores information about an authenticated user
 type userInfo struct {
-	ClusterName  string
-	Username     string
-	KubeCfgUser  string
-	IDToken      string
-	RefreshToken string
-	ClientID     string
-	ClientSecret string
-	IssuerURL    string
-	APIServerURL string
-	ClusterCA    string
-	HTTPPath     string
+	ClusterName        string
+	Username           string
+	KubeCfgUser        string
+	IDToken            string
+	RefreshToken       string
+	ClientID           string
+	ClientSecret       string
+	IssuerURL          string
+	APIServerURL       string
+	ClusterCA          string
+	IdentityProviderCA string
+	HTTPPath           string
 }
 
 // homeInfo is used to store dynamic properties on
@@ -122,11 +123,12 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 					AuthProvider: &clientcmdapi.AuthProviderConfig{
 						Name: "oidc",
 						Config: map[string]string{
-							"client-id":      cfg.ClientID,
-							"client-secret":  cfg.ClientSecret,
-							"id-token":       cfg.IDToken,
-							"idp-issuer-url": cfg.IssuerURL,
-							"refresh-token":  cfg.RefreshToken,
+							"client-id":                      cfg.ClientID,
+							"client-secret":                  cfg.ClientSecret,
+							"id-token":                       cfg.IDToken,
+							"idp-issuer-url":                 cfg.IssuerURL,
+							"refresh-token":                  cfg.RefreshToken,
+							"idp-certificate-authority-data": cfg.IdentityProviderCA,
 						},
 					},
 				},
@@ -300,6 +302,20 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		log.Warningf("Could not read CA file: %s", err)
 	}
 
+	identityProviderCA := ""
+	if cfg.IdentityProviderCAPath != "" {
+		caFile, err := os.Open(cfg.IdentityProviderCAPath)
+		if err != nil {
+			log.Errorf("Failed to open CA file. %s", err.Error())
+		}
+		defer caFile.Close()
+		idpCA, err := ioutil.ReadAll(caFile)
+		if err != nil {
+			log.Errorf("Could not read CA file: %s", err.Error())
+		}
+		identityProviderCA = base64.StdEncoding.EncodeToString(idpCA)
+	}
+
 	// load the session cookies
 	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
 	if err != nil {
@@ -362,17 +378,18 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	}
 
 	info := &userInfo{
-		ClusterName:  cfg.ClusterName,
-		Username:     username,
-		KubeCfgUser:  kubeCfgUser,
-		IDToken:      idToken,
-		RefreshToken: refreshToken,
-		ClientID:     cfg.ClientID,
-		ClientSecret: cfg.ClientSecret,
-		IssuerURL:    issuerURL,
-		APIServerURL: cfg.APIServerURL,
-		ClusterCA:    string(caBytes),
-		HTTPPath:     cfg.HTTPPath,
+		ClusterName:        cfg.ClusterName,
+		Username:           username,
+		KubeCfgUser:        kubeCfgUser,
+		IDToken:            idToken,
+		RefreshToken:       refreshToken,
+		ClientID:           cfg.ClientID,
+		ClientSecret:       cfg.ClientSecret,
+		IssuerURL:          issuerURL,
+		APIServerURL:       cfg.APIServerURL,
+		ClusterCA:          string(caBytes),
+		HTTPPath:           cfg.HTTPPath,
+		IdentityProviderCA: identityProviderCA,
 	}
 	return info
 }
