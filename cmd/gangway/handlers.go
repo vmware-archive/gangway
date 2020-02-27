@@ -299,7 +299,9 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	defer file.Close()
 	caBytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Warningf("Could not read CA file: %s", err)
+		log.Errorf("Could not read CA file: %s", err)
+		http.Error(w, "Could not read CA file", http.StatusInternalServerError)
+		return nil
 	}
 
 	identityProviderCA := ""
@@ -307,13 +309,18 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		caFile, err := os.Open(cfg.IdentityProviderCAPath)
 		if err != nil {
 			log.Errorf("Failed to open CA file. %s", err.Error())
+			http.Error(w, "Failed to open CA file", http.StatusInternalServerError)
+			return nil
 		}
 		defer caFile.Close()
 		idpCA, err := ioutil.ReadAll(caFile)
 		if err != nil {
 			log.Errorf("Could not read CA file: %s", err.Error())
+			http.Error(w, "Could not read CA file", http.StatusInternalServerError)
+			return nil
 		}
 		identityProviderCA = base64.StdEncoding.EncodeToString(idpCA)
+
 	}
 
 	// load the session cookies
