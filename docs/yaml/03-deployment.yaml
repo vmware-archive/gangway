@@ -27,7 +27,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: gangway-key
-              key: sesssionkey
+              key: sessionkey
         ports:
         - name: http
           containerPort: 8080
