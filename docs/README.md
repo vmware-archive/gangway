@@ -41,7 +41,7 @@ It's also important to note that this guide does not include an Auth provider, t
 We will use the following components:
 
 - [gangway](https://github.com/heptiolabs/gangway): OIDC client application
-- [contour](https://github.com/heptio/contour): Kubernetes Ingress controller
+- [contour](https://github.com/projectcontour/contour): Kubernetes Ingress controller
 - [cert-manager](https://github.com/jetstack/cert-manager): Controller for managing TLS certificates with Let's Encrypt.
 
 ### Cert-Manager
@@ -89,7 +89,7 @@ EOF
 Run:
 
 ```sh
-kubectl apply -f https://j.hept.io/contour-deployment-rbac
+kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
 ```
 
 This will deploy Contour in the `heptio-contour` namespace, and expose it using a service of type `LoadBalancer`.
