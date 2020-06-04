@@ -1,16 +1,12 @@
 FROM golang:1.14.2-stretch
 WORKDIR /go/src/github.com/heptiolabs/gangway
 
-RUN go get github.com/golang/dep/cmd/dep
-COPY Gopkg.toml Gopkg.lock ./
-RUN dep ensure -v -vendor-only
-
 RUN go get -u github.com/mjibson/esc/...
-COPY cmd cmd
-COPY templates templates
-COPY internal internal
+COPY . .
 RUN esc -o cmd/gangway/bindata.go templates/
 
+ENV GO111MODULE on
+RUN go mod verify
 RUN CGO_ENABLED=0 GOOS=linux go install -ldflags="-w -s" -v github.com/heptiolabs/gangway/...
 
 FROM debian:9.12-slim

@@ -30,13 +30,12 @@ install:
 	go install -v ./cmd/gangway/...
 
 setup:
-	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/mjibson/esc/...
 
 check: test vet gofmt staticcheck misspell
 
 deps:
-	dep ensure -v
+	GO111MODULE=on go mod tidy && GO111MODULE=on go mod vendor && GO111MODULE=on go mod verify
 
 vet: | test
 	go vet ./...
