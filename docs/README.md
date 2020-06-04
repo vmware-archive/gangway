@@ -21,7 +21,7 @@ If using the example YAML, create a secret to hold this value with the following
 
 ```
 kubectl -n gangway create secret generic gangway-key \
-  --from-literal=sesssionkey=$(openssl rand -base64 32)
+  --from-literal=sessionkey=$(openssl rand -base64 32)
 ```
 
 ## Path Prefix
@@ -55,7 +55,7 @@ kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.4.1/
 Apply the following config to create the staging and production `ClusterIssuer` making sure to update the `email` field below with your email address:
 
 ```sh
-cat <<EOF | kubectl create -f - 
+cat <<EOF | kubectl create -f -
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: ClusterIssuer
 metadata:
@@ -102,7 +102,7 @@ Get the hostname of the ELB that Kubernetes created for the contour service:
 kubectl get svc -n heptio-contour contour -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 ```
 
-Create a wildcard CNAME record that aliases the domain under your control to the hostname of the ELB obtained above. 
+Create a wildcard CNAME record that aliases the domain under your control to the hostname of the ELB obtained above.
 
 For instance, if you own `example.com`, create a CNAME record for `*.example.com`, so that you can access gangway at `https://gangway.example.com`.
 
@@ -131,7 +131,7 @@ Create the gangway cookies that are used to encrypt gangway cookies:
 
 ```sh
 kubectl -n gangway create secret generic gangway-key \
-  --from-literal=sesssionkey=$(openssl rand -base64 32)
+  --from-literal=sessionkey=$(openssl rand -base64 32)
 ```
 
 ### Validate Certs
