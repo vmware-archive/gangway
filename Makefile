@@ -48,7 +48,7 @@ test:
 
 staticcheck:
 	@go get honnef.co/go/tools/cmd/staticcheck
-	staticcheck -unused.whole-program $(PKGS)
+	staticcheck $(PKGS)
 
 misspell:
 	@go get github.com/client9/misspell/cmd/misspell
