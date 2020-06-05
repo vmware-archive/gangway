@@ -3,7 +3,13 @@ WORKDIR /go/src/github.com/heptiolabs/gangway
 
 RUN go get -u github.com/mjibson/esc/...
 COPY . .
-RUN esc -o cmd/gangway/bindata.go templates/
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-bash.js assets/
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/prism.js assets/
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/themes/prism.css assets/
+ADD https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-powershell.js assets/
+ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/css/materialize.min.css assets/
+ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/js/materialize.min.js assets/
+RUN esc -o cmd/gangway/bindata.go templates/ assets/
 
 ENV GO111MODULE on
 RUN go mod verify

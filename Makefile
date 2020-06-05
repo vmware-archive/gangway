@@ -31,6 +31,12 @@ install:
 
 setup:
 	go get -u github.com/mjibson/esc/...
+	curl -o assets/prism-bash.js https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-bash.js
+	curl -o assets/prism.js https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/prism.js
+	curl -o assets/prism.css https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/themes/prism.css
+	curl -o assets/prism-powershell.js https://raw.githubusercontent.com/PrismJS/prism/v1.16.0/components/prism-powershell.js
+	curl -o assets/materialize.min.css https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/css/materialize.min.css
+	curl -o assets/materialize.min.js https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/js/materialize.min.js
 
 check: test vet gofmt staticcheck misspell
 
@@ -41,7 +47,7 @@ vet: | test
 	go vet ./...
 
 bindata:
-	esc -o cmd/gangway/bindata.go templates/
+	esc -o cmd/gangway/bindata.go templates/ assets/
 
 test:
 	go test -v ./...
