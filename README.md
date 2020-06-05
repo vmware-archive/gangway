@@ -62,9 +62,8 @@ kube-apiserver
 
 Requirements for building
 
-- Go (built with 1.10)
+- Go (built with version >= 1.12)
 - [esc](https://github.com/mjibson/esc) for static resources.
-- [dep](https://github.com/golang/dep) for dependency management.
 
 A Makefile is provided for building tasks. The options are as follows
 
