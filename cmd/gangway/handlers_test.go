@@ -134,8 +134,8 @@ func TestCallbackHandler(t *testing.T) {
 
 		})
 	}
-
 }
+
 func TestCommandLineHandler(t *testing.T) {
 	tests := map[string]struct {
 		params                     map[string]string
@@ -189,12 +189,30 @@ func TestCommandLineHandler(t *testing.T) {
 			var sessionRefreshToken *sessions.Session
 			var err error
 
+			// Create dummy cluster CA file
+			clusterCAData := "dummy cluster CA"
+			f, err := ioutil.TempFile("", "gangway-kubeconfig-handler-test")
+			if err != nil {
+				t.Fatalf("Error creating temp file: %v", err)
+			}
+			fmt.Fprint(f, clusterCAData)
+
+			// Create dummy IdP CA file
+			idpCAData := "dummy-idp-CA"
+			idpCA, err := ioutil.TempFile("", "idp-ca")
+			if err != nil {
+				t.Fatalf("Error creating temp file: %v", err)
+			}
+			fmt.Fprint(idpCA, idpCAData)
+
 			cfg = &config.Config{
-				HTTPPath:      "/foo",
-				EmailClaim:    tc.emailClaim,
-				UsernameClaim: tc.usernameClaim,
-				ClusterName:   "cluster1",
-				APIServerURL:  "https://kubernetes",
+				HTTPPath:               "/foo",
+				EmailClaim:             tc.emailClaim,
+				UsernameClaim:          tc.usernameClaim,
+				ClusterName:            "cluster1",
+				APIServerURL:           "https://kubernetes",
+				ClusterCAPath:          f.Name(),
+				IdentityProviderCAPath: idpCA.Name(),
 			}
 
 			// Init variables
@@ -252,7 +270,7 @@ func TestCommandLineHandler(t *testing.T) {
 				bodyString := string(bodyBytes)
 				re := regexp.MustCompile("--user=(.+)")
 				found := re.FindString(bodyString)
-				if !strings.Contains(found, tc.expectedUsernameInTemplate) {
+				if strings.Contains(found, tc.expectedUsernameInTemplate) {
 					t.Errorf("template should contain --user=%s but found %s", tc.expectedUsernameInTemplate, found)
 				}
 			}

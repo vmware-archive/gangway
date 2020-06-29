@@ -295,6 +295,8 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		// let us know that we couldn't open the file. This only cause missing output
 		// does not impact actual function of program
 		log.Errorf("Failed to open CA file. %s", err)
+		http.Error(w, "Failed to open CA file", http.StatusInternalServerError)
+		return nil
 	}
 	defer file.Close()
 	caBytes, err := ioutil.ReadAll(file)
@@ -308,14 +310,14 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	if cfg.IdentityProviderCAPath != "" {
 		caFile, err := os.Open(cfg.IdentityProviderCAPath)
 		if err != nil {
-			log.Errorf("Failed to open CA file. %s", err.Error())
+			log.Errorf("Failed to open CA file. %s", err)
 			http.Error(w, "Failed to open CA file", http.StatusInternalServerError)
 			return nil
 		}
 		defer caFile.Close()
 		idpCA, err := ioutil.ReadAll(caFile)
 		if err != nil {
-			log.Errorf("Could not read CA file: %s", err.Error())
+			log.Errorf("Could not read CA file: %s", err)
 			http.Error(w, "Could not read CA file", http.StatusInternalServerError)
 			return nil
 		}
