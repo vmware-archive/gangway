@@ -18,7 +18,9 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
+	"time"
 )
 
 // TransportConfig describes a configured httpClient
@@ -46,13 +48,25 @@ func NewTransportConfig(trustedCAPath string) *TransportConfig {
 		}
 	}
 
-	// Trust the augmented cert pool in our client
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: rootCAs,
-			},
+	// Transport based on http.DefaultTransport
+	t := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig: &tls.Config{
+			RootCAs: rootCAs,
 		},
+	}
+
+	httpClient := &http.Client{
+		Transport: t,
 	}
 
 	return &TransportConfig{

@@ -60,7 +60,7 @@ func NewConfig(configFile string) (*Config, error) {
 		AllowEmptyClientSecret: false,
 		Scopes:                 []string{"openid", "profile", "email", "offline_access"},
 		UsernameClaim:          "nickname",
-		EmailClaim:             "email",
+		EmailClaim:             "",
 		ServeTLS:               false,
 		CertFile:               "/etc/gangway/tls/tls.crt",
 		KeyFile:                "/etc/gangway/tls/tls.key",

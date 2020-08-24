@@ -55,19 +55,19 @@ $ sudo mv ./kubectl /usr/local/bin/kubectl
             </div>
             <pre>
                <code class="language-bash">
-echo "{{ .ClusterCA }}" \ > ca-{{ .ClusterName }}.pem
-kubectl config set-cluster {{ .ClusterName }} --server={{ .APIServerURL }} --certificate-authority=ca-{{ .ClusterName }}.pem --embed-certs
-kubectl config set-credentials {{ .Email }}  \
+echo "{{ .ClusterCA }}" \ > "ca-{{ .ClusterName }}.pem"
+kubectl config set-cluster "{{ .ClusterName }}" --server={{ .APIServerURL }} --certificate-authority="ca-{{ .ClusterName }}.pem" --embed-certs
+kubectl config set-credentials "{{ .KubeCfgUser }}"  \
     --auth-provider=oidc  \
-    --auth-provider-arg=idp-issuer-url={{ .IssuerURL }}  \
-    --auth-provider-arg=client-id={{ .ClientID }}  \
-    --auth-provider-arg=client-secret={{ .ClientSecret }} \
-    --auth-provider-arg=refresh-token={{ .RefreshToken }} \
-    --auth-provider-arg=id-token={{ .IDToken }} \
+    --auth-provider-arg='idp-issuer-url={{ .IssuerURL }}'  \
+    --auth-provider-arg='client-id={{ .ClientID }}'  \
+    --auth-provider-arg='client-secret={{ .ClientSecret }}' \
+    --auth-provider-arg='refresh-token={{ .RefreshToken }}' \
+    --auth-provider-arg='id-token={{ .IDToken }}' \
     --auth-provider-arg=idp-certificate-authority-data={{ .TrustedCA | base64enc }}
-kubectl config set-context {{ .ClusterName }} --cluster={{ .ClusterName }} --user={{ .Email }}
-kubectl config use-context {{ .ClusterName }}
-rm ca-{{ .ClusterName }}.pem
+kubectl config set-context "{{ .ClusterName }}" --cluster="{{ .ClusterName }}" --user="{{ .KubeCfgUser }}"
+kubectl config use-context "{{ .ClusterName }}"
+rm "ca-{{ .ClusterName }}.pem"
               </code>
             </pre>
         </div>
