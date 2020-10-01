@@ -7,7 +7,7 @@ How you provide access to the service is going to be dependent on your specific 
 A good starting point for yaml manifests for deploying to Kubernetes is in the [yaml](./yaml) directory.
 This creates a namespace, configmap, deployment and service.
 There is also an example ingress config that is set up to work with [Project Contour](https://github.com/projectcontour/contour), [JetStack cert-manager](https://github.com/jetstack/cert-manager) and [Let's Encrypt](https://letsencrypt.org/).
-See [Dave Cheney's blog post](https://blog.heptio.com/how-to-deploy-web-applications-on-kubernetes-with-heptio-contour-and-lets-encrypt-d58efbad9f56) for an example of getting all of that configured.
+See [Project Contour's Guide](https://projectcontour.io/guides/cert-manager/) for help in deployment.
 
 You will probably have to adjust the service and ingress configs to match your environment as there is no one true way to reach services in Kubernetes that will work for everyone.
 
