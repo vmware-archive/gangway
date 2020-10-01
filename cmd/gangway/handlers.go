@@ -22,6 +22,7 @@ import (
 	htmltemplate "html/template"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -166,7 +167,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	b := make([]byte, 32)
 	rand.Read(b)
-	state := base64.StdEncoding.EncodeToString(b)
+	state := url.QueryEscape(base64.StdEncoding.EncodeToString(b))
 
 	session, err := gangwayUserSession.Session.Get(r, "gangway")
 	if err != nil {
