@@ -93,3 +93,7 @@ data:
     # The path to find custom HTML templates
     # Env var: GANGWAY_CUSTOM_HTTP_TEMPLATES_DIR
     #customHTMLTemplatesDir: /custom-templates
+
+    # The path to find the CA bundle for the IdP, optional. Used to configure kubectl.
+    # Env var: GANGWAY_IDP_CA_PATH
+    # idpCAPath: "/cacerts/idpca.cert"
