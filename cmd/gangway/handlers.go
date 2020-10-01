@@ -43,6 +43,7 @@ const (
 type userInfo struct {
 	ClusterName  string
 	Username     string
+	Claims       jwt.MapClaims
 	KubeCfgUser  string
 	IDToken      string
 	RefreshToken string
@@ -365,6 +366,7 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	info := &userInfo{
 		ClusterName:  cfg.ClusterName,
 		Username:     username,
+		Claims:       claims,
 		KubeCfgUser:  kubeCfgUser,
 		IDToken:      idToken,
 		RefreshToken: refreshToken,
