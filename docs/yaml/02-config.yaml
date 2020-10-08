@@ -80,7 +80,7 @@ data:
     # This is typically mounted into the default location for workloads running on
     # a Kubernetes cluster and doesn't need to be set.
     # Env var: GANGWAY_CLUSTER_CA_PATH
-    # cluster_ca_path: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    # clusterCAPath: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
     # The path to a root CA to trust for self signed certificates at the Oauth2 URLs
     # Env var: GANGWAY_TRUSTED_CA_PATH

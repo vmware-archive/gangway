@@ -22,6 +22,7 @@ import (
 	htmltemplate "html/template"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -42,6 +43,7 @@ const (
 type userInfo struct {
 	ClusterName  string
 	Username     string
+	Claims       jwt.MapClaims
 	KubeCfgUser  string
 	IDToken      string
 	RefreshToken string
@@ -167,7 +169,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	b := make([]byte, 32)
 	rand.Read(b)
-	state := base64.StdEncoding.EncodeToString(b)
+	state := url.QueryEscape(base64.StdEncoding.EncodeToString(b))
 
 	session, err := gangwayUserSession.Session.Get(r, "gangway")
 	if err != nil {
@@ -382,6 +384,7 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	info := &userInfo{
 		ClusterName:  cfg.ClusterName,
 		Username:     username,
+		Claims:       claims,
 		KubeCfgUser:  kubeCfgUser,
 		IDToken:      idToken,
 		RefreshToken: refreshToken,
