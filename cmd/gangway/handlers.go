@@ -182,7 +182,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	// -ta keeps flow from breaking if gangway has multiple ingress points to keep state consistent
+	if cfg.AllowIngressRedirect {
+		oauth2Cfg.RedirectURL = fmt.Sprintf("https://%v/callback", r.Host)
+	}
 	audience := oauth2.SetAuthURLParam("audience", cfg.Audience)
 	url := oauth2Cfg.AuthCodeURL(state, audience)
 
@@ -201,18 +204,21 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// load up session cookies
 	session, err := gangwayUserSession.Session.Get(r, "gangway")
+	fmt.Println(err)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
+	fmt.Println(err)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	sessionRefreshToken, err := gangwayUserSession.Session.Get(r, "gangway_refresh_token")
+	fmt.Println(err)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
