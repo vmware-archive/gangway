@@ -98,18 +98,23 @@ func main() {
 	if cfg.ServeTLS {
 		// update http server with TLS config
 		httpServer.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12, // minimum TLS 1.2
+			// P curve order does not matter, as breaking one means all others can be brute-forced as well:
+			// Golang developers prefer:
+			CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384, tls.CurveP521},
+			PreferServerCipherSuites: true, // Server chooses ciphersuite, order matters below:
 			CipherSuites: []uint16{
-				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
-				tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
-				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_CHACHA20_POLY1305_SHA256, // TLS 1.3
+				tls.TLS_AES_256_GCM_SHA384,       // TLS 1.3
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_AES_128_GCM_SHA256, // TLS 1.3
 			},
-			PreferServerCipherSuites: true,
-			MinVersion:               tls.VersionTLS12,
 		}
 	}
 
