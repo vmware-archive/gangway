@@ -23,8 +23,8 @@ VERSION ?= master
 
 all: build
 
-build: deps bindata
-	go build ./...
+build: deps bindata setup
+	go build -o gangway cmd/gangway/main.go cmd/gangway/handlers.go cmd/gangway/bindata.go
 
 install:
 	go install -v ./cmd/gangway/...
@@ -35,7 +35,8 @@ setup:
 check: test vet gofmt staticcheck misspell
 
 deps:
-	GO111MODULE=on go mod tidy && GO111MODULE=on go mod vendor && GO111MODULE=on go mod verify
+	go mod download
+	go mod tidy
 
 vet: | test
 	go vet ./...
