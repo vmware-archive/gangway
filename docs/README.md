@@ -6,8 +6,8 @@ How you provide access to the service is going to be dependent on your specific 
 
 A good starting point for yaml manifests for deploying to Kubernetes is in the [yaml](./yaml) directory.
 This creates a namespace, configmap, deployment and service.
-There is also an example ingress config that is set up to work with [Heptio Contour](https://github.com/heptio/contour), [JetStack cert-manager](https://github.com/jetstack/cert-manager) and [Let's Encrypt](https://letsencrypt.org/).
-See [Dave Cheney's blog post](https://blog.heptio.com/how-to-deploy-web-applications-on-kubernetes-with-heptio-contour-and-lets-encrypt-d58efbad9f56) for an example of getting all of that configured.
+There is also an example ingress config that is set up to work with [Project Contour](https://github.com/projectcontour/contour), [JetStack cert-manager](https://github.com/jetstack/cert-manager) and [Let's Encrypt](https://letsencrypt.org/).
+See [this guide](https://projectcontour.io/guides/cert-manager/) for help getting started.
 
 You will probably have to adjust the service and ingress configs to match your environment as there is no one true way to reach services in Kubernetes that will work for everyone.
 
@@ -92,14 +92,14 @@ Run:
 kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
 ```
 
-This will deploy Contour in the `heptio-contour` namespace, and expose it using a service of type `LoadBalancer`.
+This will deploy Contour in the `projectcontour` namespace, and expose it using a service of type `LoadBalancer`.
 
 ### Configure DNS Record
 
 Get the hostname of the ELB that Kubernetes created for the contour service:
 
 ```sh
-kubectl get svc -n heptio-contour contour -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+kubectl get svc -n projectcontour contour -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 ```
 
 Create a wildcard CNAME record that aliases the domain under your control to the hostname of the ELB obtained above.
