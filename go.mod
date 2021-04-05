@@ -1,5 +1,5 @@
 module github.com/heptiolabs/gangway
-// replace github.com/heptiolabs/gangway => github.com/tall3n/gangway
+replace github.com/heptiolabs/gangway => github.com/tall3n/gangway v3.2.1
 
 go 1.15
 
