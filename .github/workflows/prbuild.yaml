@@ -28,6 +28,7 @@ jobs:
           make setup
           make deps
           make bindata
+          make build
           make check
   test-osx:
     runs-on: macos-latest
@@ -51,4 +52,5 @@ jobs:
           make setup
           make deps
           make bindata
+          make build
           make check

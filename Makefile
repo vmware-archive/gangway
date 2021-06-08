@@ -35,7 +35,7 @@ setup:
 check: test vet gofmt staticcheck misspell
 
 deps:
-	GO111MODULE=on go mod tidy && GO111MODULE=on go mod vendor && GO111MODULE=on go mod verify
+	go mod vendor && go mod verify
 
 vet: | test
 	go vet ./...
