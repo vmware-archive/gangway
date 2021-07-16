@@ -52,6 +52,7 @@ type userInfo struct {
 	IssuerURL    string
 	APIServerURL string
 	ClusterCA    string
+	TrustedCA    string
 	HTTPPath     string
 }
 
@@ -84,7 +85,7 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 		return
 	}
 
-	tmpl := htmltemplate.New(tmplFile)
+	tmpl := htmltemplate.New(tmplFile).Funcs(FuncMap())
 	tmpl, err = tmpl.Parse(string(templateData))
 	if err != nil {
 		log.Errorf("Failed to parse template: %v", err)
@@ -124,11 +125,12 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 					AuthProvider: &clientcmdapi.AuthProviderConfig{
 						Name: "oidc",
 						Config: map[string]string{
-							"client-id":      cfg.ClientID,
-							"client-secret":  cfg.ClientSecret,
-							"id-token":       cfg.IDToken,
-							"idp-issuer-url": cfg.IssuerURL,
-							"refresh-token":  cfg.RefreshToken,
+							"client-id":                      cfg.ClientID,
+							"client-secret":                  cfg.ClientSecret,
+							"id-token":                       cfg.IDToken,
+							"idp-issuer-url":                 cfg.IssuerURL,
+							"idp-certificate-authority-data": base64.StdEncoding.EncodeToString([]byte(cfg.TrustedCA)),
+							"refresh-token":                  cfg.RefreshToken,
 						},
 					},
 				},
@@ -292,14 +294,30 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	// read in public ca.crt to output in commandline copy/paste commands
 	file, err := os.Open(cfg.ClusterCAPath)
 	if err != nil {
-		// let us know that we couldn't open the file. This only cause missing output
+		// let us know that we couldn't open the file. This only causes missing output
 		// does not impact actual function of program
 		log.Errorf("Failed to open CA file. %s", err)
 	}
 	defer file.Close()
 	caBytes, err := ioutil.ReadAll(file)
 	if err != nil {
+		// let us know that we couldn't open the file. This only causes missing output
+		// does not impact actual function of program
 		log.Warningf("Could not read CA file: %s", err)
+	}
+	// read in trusted ca cert to output in commandline copy/paste commands
+	file, err = os.Open(cfg.TrustedCAPath)
+	if err != nil {
+		// let us know that we couldn't open the file. This only causes missing output
+		// does not impact actual function of program
+		log.Errorf("Failed to open TrustedCA file. %s", err)
+	}
+	defer file.Close()
+	trustedCABytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		// let us know that we couldn't open the file. This only causes missing output
+		// does not impact actual function of program
+		log.Warningf("Failed to read TrustedCA file. %s", err)
 	}
 
 	// load the session cookies
@@ -375,6 +393,7 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		IssuerURL:    issuerURL,
 		APIServerURL: cfg.APIServerURL,
 		ClusterCA:    string(caBytes),
+		TrustedCA:    string(trustedCABytes),
 		HTTPPath:     cfg.HTTPPath,
 	}
 	return info
