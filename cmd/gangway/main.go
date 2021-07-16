@@ -47,6 +47,18 @@ func httpLogger(fn http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func rootPathHandler(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// The "/" pattern matches everything, so we need to check
+		// that we're at the root here.
+		if cfg.HTTPPath == "" && r.URL.Path != "/" {
+			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusMovedPermanently)
+			return
+		}
+		fn(w, r)
+	}
+}
+
 func main() {
 	cfgFile := flag.String("config", "", "The config file to use.")
 	flag.Parse()
@@ -78,7 +90,7 @@ func main() {
 
 	loginRequiredHandlers := alice.New(loginRequired)
 
-	http.HandleFunc(cfg.GetRootPathPrefix(), httpLogger(homeHandler))
+	http.HandleFunc(cfg.GetRootPathPrefix(), httpLogger(rootPathHandler(homeHandler)))
 	http.HandleFunc(fmt.Sprintf("%s/login", cfg.HTTPPath), httpLogger(loginHandler))
 	http.HandleFunc(fmt.Sprintf("%s/callback", cfg.HTTPPath), httpLogger(callbackHandler))
 
