@@ -36,6 +36,7 @@ type Config struct {
 	AllowEmptyClientSecret bool     `yaml:"allowEmptyClientSecret" envconfig:"allow_empty_client_secret"`
 	Audience               string   `yaml:"audience" envconfig:"audience"`
 	RedirectURL            string   `yaml:"redirectURL" envconfig:"redirect_url"`
+	AllowIngressRedirect   bool     `yaml:"allowIngressRedirect" envconfig:"allow_ingress_redirect"`
 	Scopes                 []string `yaml:"scopes" envconfig:"scopes"`
 	UsernameClaim          string   `yaml:"usernameClaim" envconfig:"username_claim"`
 	EmailClaim             string   `yaml:"emailClaim" envconfig:"email_claim"`
@@ -62,6 +63,7 @@ func NewConfig(configFile string) (*Config, error) {
 		UsernameClaim:          "nickname",
 		EmailClaim:             "",
 		ServeTLS:               false,
+		AllowIngressRedirect:   false,
 		CertFile:               "/etc/gangway/tls/tls.crt",
 		KeyFile:                "/etc/gangway/tls/tls.key",
 		ClusterCAPath:          "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
@@ -106,7 +108,7 @@ func (cfg *Config) Validate() error {
 		{cfg.TokenURL == "", "no tokenURL specified"},
 		{cfg.ClientID == "", "no clientID specified"},
 		{cfg.ClientSecret == "" && !cfg.AllowEmptyClientSecret, "no clientSecret specified"},
-		{cfg.RedirectURL == "", "no redirectURL specified"},
+		{cfg.RedirectURL == "" && !cfg.AllowIngressRedirect, "no redirectURL specified"},
 		{cfg.SessionSecurityKey == "", "no SessionSecurityKey specified"},
 		{cfg.APIServerURL == "", "no apiServerURL specified"},
 	}

@@ -182,7 +182,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	// keeps flow from breaking if gangway has multiple ingress points to keep state consistent
+	if cfg.AllowIngressRedirect {
+		oauth2Cfg.RedirectURL = fmt.Sprintf("https://%v/callback", r.Host)
+	}
 	audience := oauth2.SetAuthURLParam("audience", cfg.Audience)
 	url := oauth2Cfg.AuthCodeURL(state, audience)
 
